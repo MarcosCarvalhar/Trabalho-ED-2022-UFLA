@@ -61,15 +61,15 @@ void converterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSa
 				
 				getline(aArquivoEntrada, sValorCampo, ','); 
 				cout << sValorCampo << ",";
-				iTamanho = int(sizeof(sValorCampo));
+				iTamanho = sValorCampo.size();
 				for (int i = 0; i < iTamanho; i++)
 				{
 					(TRegistro.cEmployeeName)[i] = (sValorCampo)[i];
 				}
-				
+								
 				getline(aArquivoEntrada, sValorCampo, ','); 
 				cout << sValorCampo << ","; 
-				iTamanho = int(sizeof(sValorCampo));
+				iTamanho = sValorCampo.size();
 				for (int i = 0; i < iTamanho; i++)
 				{
 					(TRegistro.cJobTitle)[i] = (sValorCampo)[i];
@@ -112,33 +112,74 @@ void converterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSa
 }
 
 
-void imprimirArquivoBinario(string _sNomeArquivoBinario)
+void imprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, int _iPosicaoFinal)
 {
-	
-    ifstream aArquivoBinario;
-    aArquivoBinario.open(_sNomeArquivoBinario, ios::binary);
+	if ((_iPosicaoInicial == -1) and (_iPosicaoFinal == -1))
+	{
+		ifstream aArquivoBinario;
+		aArquivoBinario.open(_sNomeArquivoBinario, ios::binary);
 
-    if (aArquivoBinario)
-    {
-        aArquivoBinario.seekg(0, aArquivoBinario.end);
-        int tam = aArquivoBinario.tellg();
-        aArquivoBinario.seekg(0, aArquivoBinario.beg);
+		if (aArquivoBinario)
+		{
+			aArquivoBinario.seekg(0, aArquivoBinario.end);
+			int tam = aArquivoBinario.tellg();
+			aArquivoBinario.seekg(0, aArquivoBinario.beg);
 
-        int numero_registros = tam / sizeof(registro);
+			int numero_registros = tam / sizeof(PayrollSaoFrancisco);
 
-        registro* vetor_registros = new registro[numero_registros];
+			//PayrollSaoFrancisco* vetor_registros = new PayrollSaoFrancisco[numero_registros];
+			
+			PayrollSaoFrancisco tmpRegistro;
 
-        for (int i = 0; i < numero_registros; i++) 
-        {
-            entrada.read((char*)(&vetor_registros[i]), sizeof(registro));         
-        }
+			for (int i = 0; i < numero_registros; i++) 
+			{
+				//aArquivoBinario.read((char*)(&vetor_registros[i]), sizeof(PayrollSaoFrancisco));         
+				aArquivoBinario.read((char*)(&tmpRegistro), sizeof(PayrollSaoFrancisco));
+				cout << "Nome do Funcionário: " << tmpRegistro.cEmployeeName << endl;     
+			}
 
-        entrada.close();
-    }
-    else
-    {
-        cout << "Erro na leitura do arquivo!";
-    }
+			aArquivoBinario.close();
+		}
+		else
+		{
+			cout << "Erro na leitura do arquivo!";
+		}
+	} else
+	{
+		ifstream aArquivoBinario;
+		aArquivoBinario.open(_sNomeArquivoBinario, ios::binary);
+		
+		int iQuantidadeRegistros = iPosicaoFinal - iPosicaoInicial;
+		
+		if (aArquivoBinario)
+		{
+			aArquivoBinario.seekg(0, aArquivoBinario.end);
+			int tam = aArquivoBinario.tellg();
+			aArquivoBinario.seekg(0, aArquivoBinario.beg);
+
+			if (tam < iQuantidadeRegistros)
+			{
+				int numero_registros = tam / sizeof(PayrollSaoFrancisco);
+			} else
+			{
+				int numero_registros = iQuantidadeRegistros / sizeof(PayrollSaoFrancisco);
+			}
+			
+			PayrollSaoFrancisco tmpRegistro;
+
+			for (int i = 0; i < numero_registros; i++) 
+			{        
+				aArquivoBinario.read((char*)(&tmpRegistro), sizeof(PayrollSaoFrancisco));
+				cout << "Nome do Funcionário: " << tmpRegistro.cEmployeeName << endl;     
+			}
+
+			aArquivoBinario.close();
+		}
+		else
+		{
+			cout << "Erro na leitura do arquivo!";
+		}
+	}
 
 	//aArquivoBinario.read(reinterpret_cast<char *> (&variavel), sizeof(tipo_dado_variavel));
 }
@@ -150,9 +191,24 @@ int main()
     string sNomeArquivo = "san_francisco_payroll_dataset.csv";
     string sNomeArquivoBinario = "san_francisco_payroll_dataset.bin";
     
-    converterCSVParaBinario(sNomeArquivo, sNomeArquivoBinario);
+    int iOpcao = -1;
     
-    imprimirArquivoBinario(sNomeArquivoBinario);
+    while(iOpcao != 0)
+    {
+		cin >> iOpcao;
+		if (iOpcao == 1)
+		{    
+			converterCSVParaBinario(sNomeArquivo, sNomeArquivoBinario, -1, -1);
+		} else if (iOpcao == 2)
+		{
+			imprimirArquivoBinario(sNomeArquivoBinario);
+		} else if (iOpcao == 3)
+		{
+			int iPosicaoInicial, iPosicaoFinal;
+			cin >> iPosicaoInicial >> iPosicaoFinal;
+			imprimirArquivoBinario(sNomeArquivoBinario, iPosicaoInicial, iPosicaoFinal);
+		}
+	}
 
     return 0;
 }
