@@ -198,10 +198,10 @@ int main()
 		cin >> iOpcao;
 		if (iOpcao == 1)
 		{    
-			converterCSVParaBinario(sNomeArquivo, sNomeArquivoBinario, -1, -1);
+			converterCSVParaBinario(sNomeArquivo, sNomeArquivoBinario);
 		} else if (iOpcao == 2)
 		{
-			imprimirArquivoBinario(sNomeArquivoBinario);
+			imprimirArquivoBinario(sNomeArquivoBinario, -1, -1);
 		} else if (iOpcao == 3)
 		{
 			int iPosicaoInicial, iPosicaoFinal;
