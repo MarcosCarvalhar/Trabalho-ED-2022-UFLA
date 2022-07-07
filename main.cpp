@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -135,7 +136,7 @@ void imprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, i
 			{
 				//aArquivoBinario.read((char*)(&vetor_registros[i]), sizeof(PayrollSaoFrancisco));         
 				aArquivoBinario.read((char*)(&tmpRegistro), sizeof(PayrollSaoFrancisco));
-				cout << "Nome do Funcionário: " << tmpRegistro.cEmployeeName << endl;     
+				cout << "Nome do Funcionario: " << tmpRegistro.cEmployeeName << endl;     
 			}
 
 			aArquivoBinario.close();
@@ -149,28 +150,24 @@ void imprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, i
 		ifstream aArquivoBinario;
 		aArquivoBinario.open(_sNomeArquivoBinario, ios::binary);
 		
-		int iQuantidadeRegistros = iPosicaoFinal - iPosicaoInicial;
+		int iQuantidadeRegistros = _iPosicaoFinal - _iPosicaoInicial + 1;
 		
 		if (aArquivoBinario)
 		{
-			aArquivoBinario.seekg(0, aArquivoBinario.end);
+			aArquivoBinario.seekg((_iPosicaoInicial * sizeof(PayrollSaoFrancisco)), aArquivoBinario.end);
 			int tam = aArquivoBinario.tellg();
-			aArquivoBinario.seekg(0, aArquivoBinario.beg);
+			aArquivoBinario.seekg((_iPosicaoInicial * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
 
-			if (tam < iQuantidadeRegistros)
-			{
-				int numero_registros = tam / sizeof(PayrollSaoFrancisco);
-			} else
-			{
-				int numero_registros = iQuantidadeRegistros / sizeof(PayrollSaoFrancisco);
-			}
+			int numero_registros = 0;
+			
+			numero_registros = tam / sizeof(PayrollSaoFrancisco);		
 			
 			PayrollSaoFrancisco tmpRegistro;
 
-			for (int i = 0; i < numero_registros; i++) 
+			for (int i = 0; i < iQuantidadeRegistros; i++) 
 			{        
 				aArquivoBinario.read((char*)(&tmpRegistro), sizeof(PayrollSaoFrancisco));
-				cout << "Nome do Funcionário: " << tmpRegistro.cEmployeeName << endl;     
+				cout << "Nome do Funcionario: " << tmpRegistro.cEmployeeName << endl;     
 			}
 
 			aArquivoBinario.close();
