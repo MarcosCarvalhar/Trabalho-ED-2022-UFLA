@@ -26,7 +26,7 @@ struct PayrollSaoFrancisco
     double fBasePay; // Pagamento Base
     double fOvertimePay; // Pagamento extra
     double fOtherPay; // Outros pagamentos
-    double fBenefits; // Benefícios
+    double fBenefits; // Beneficios
     double fTotalPay; // Pagamento Total
     double fTotalPay_Benefits; // Pagamento Total 
     int iYear; // Ano      
@@ -67,7 +67,8 @@ void converterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSa
 				{
 					(TRegistro.cEmployeeName)[i] = (sValorCampo)[i];
 				}
-								
+				(TRegistro.cEmployeeName)[iTamanho] = '\0';				
+				
 				getline(aArquivoEntrada, sValorCampo, ','); 
 				cout << sValorCampo << ","; 
 				iTamanho = sValorCampo.size();
@@ -75,6 +76,8 @@ void converterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSa
 				{
 					(TRegistro.cJobTitle)[i] = (sValorCampo)[i];
 				} 
+				
+				(TRegistro.cJobTitle)[iTamanho] = '\0';
 				
 				getline(aArquivoEntrada, sValorCampo, ',');  
 				cout << sValorCampo << ",";
@@ -87,19 +90,27 @@ void converterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSa
 				getline(aArquivoEntrada, sValorCampo, ',');
 				if (sValorCampo == "Not Provided")
 					sValorCampo = '0';
+				cout << sValorCampo << ",";  
 				TRegistro.fOtherPay = std::atof(sValorCampo.c_str());
 				
-				getline(aArquivoEntrada, sValorCampo, ',');  
+				getline(aArquivoEntrada, sValorCampo, ',');
+				cout << sValorCampo << ",";    
 				TRegistro.fBenefits = std::atof(sValorCampo.c_str());
 				
-				getline(aArquivoEntrada, sValorCampo, ',');  
+				getline(aArquivoEntrada, sValorCampo, ',');
+				cout << sValorCampo << ",";    
 				TRegistro.fTotalPay = std::atof(sValorCampo.c_str());
 				
-				getline(aArquivoEntrada, sValorCampo);
-				cout << sValorCampo;  
+				getline(aArquivoEntrada, sValorCampo, ',');
+				cout << sValorCampo << ",";  
 				TRegistro.fTotalPay_Benefits = std::atof(sValorCampo.c_str());
+				
+				getline(aArquivoEntrada, sValorCampo); 
+				cout << sValorCampo; 
+				TRegistro.iYear = std::stoi(sValorCampo);
 
 				cout << endl;
+				// reinterpret_cast<char *> 
 				aArquivoSaida.write((const char *)(&TRegistro), sizeof(PayrollSaoFrancisco)); 
 			}
         }
@@ -112,6 +123,10 @@ void converterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSa
     aArquivoSaida.close();
 }
 
+void alterarRegistro(int _iPosicao)
+{
+	
+}
 
 void imprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, int _iPosicaoFinal)
 {
@@ -127,16 +142,32 @@ void imprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, i
 			aArquivoBinario.seekg(0, aArquivoBinario.beg);
 
 			int numero_registros = tam / sizeof(PayrollSaoFrancisco);
-
-			//PayrollSaoFrancisco* vetor_registros = new PayrollSaoFrancisco[numero_registros];
 			
 			PayrollSaoFrancisco tmpRegistro;
 
 			for (int i = 0; i < numero_registros; i++) 
-			{
-				//aArquivoBinario.read((char*)(&vetor_registros[i]), sizeof(PayrollSaoFrancisco));         
-				aArquivoBinario.read((char*)(&tmpRegistro), sizeof(PayrollSaoFrancisco));
-				cout << "Nome do Funcionario: " << tmpRegistro.cEmployeeName << endl;     
+			{      
+				aArquivoBinario.read(reinterpret_cast<char*>(&tmpRegistro), sizeof(PayrollSaoFrancisco));
+				/*cout << "ID: " << tmpRegistro.iID << ", ";
+				cout << "Nome do Funcionario: " << tmpRegistro.cEmployeeName << ", ";
+				cout << "Cargo: " << tmpRegistro.cJobTitle << ", ";
+				cout << "Pagamento Base: " << tmpRegistro.fBasePay << ", "; 
+				cout << "Pagamento extra: " << tmpRegistro.fOvertimePay << ", ";
+				cout << "Outros pagamentos: " << tmpRegistro.fOtherPay << ", ";
+				cout << "Beneficios: " << tmpRegistro.fBenefits << ", ";
+				cout << "Pagamento Total: " << tmpRegistro.fTotalPay << ", ";
+				cout << "Pagamento Total com Beneficios: " << tmpRegistro.fTotalPay_Benefits << ", ";  
+				cout << "Ano: " << tmpRegistro.iYear << endl;*/
+				cout << tmpRegistro.iID << ",";
+				cout << tmpRegistro.cEmployeeName << ",";
+				cout << tmpRegistro.cJobTitle << ",";
+				cout << tmpRegistro.fBasePay << ","; 
+				cout << tmpRegistro.fOvertimePay << ",";
+				cout << tmpRegistro.fOtherPay << ",";
+				cout << tmpRegistro.fBenefits << ",";
+				cout << tmpRegistro.fTotalPay << ",";
+				cout << tmpRegistro.fTotalPay_Benefits << ",";  
+				cout << tmpRegistro.iYear << endl;    
 			}
 
 			aArquivoBinario.close();
@@ -162,12 +193,34 @@ void imprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, i
 			
 			numero_registros = tam / sizeof(PayrollSaoFrancisco);		
 			
+			if (numero_registros < iQuantidadeRegistros)
+				iQuantidadeRegistros = numero_registros;
+				
 			PayrollSaoFrancisco tmpRegistro;
 
 			for (int i = 0; i < iQuantidadeRegistros; i++) 
 			{        
-				aArquivoBinario.read((char*)(&tmpRegistro), sizeof(PayrollSaoFrancisco));
-				cout << "Nome do Funcionario: " << tmpRegistro.cEmployeeName << endl;     
+				aArquivoBinario.read(reinterpret_cast<char*>(&tmpRegistro), sizeof(PayrollSaoFrancisco));
+				/*cout << "ID: " << tmpRegistro.iID << ", ";
+				cout << "Nome do Funcionario: " << tmpRegistro.cEmployeeName << ", ";
+				cout << "Cargo: " << tmpRegistro.cJobTitle << ", ";
+				cout << "Pagamento Base: " << tmpRegistro.fBasePay << ", "; 
+				cout << "Pagamento extra: " << tmpRegistro.fOvertimePay << ", ";
+				cout << "Outros pagamentos: " << tmpRegistro.fOtherPay << ", ";
+				cout << "Beneficios: " << tmpRegistro.fBenefits << ", ";
+				cout << "Pagamento Total: " << tmpRegistro.fTotalPay << ", ";
+				cout << "Pagamento Total com Beneficios: " << tmpRegistro.fTotalPay_Benefits << ", ";  
+				cout << "Ano: " << tmpRegistro.iYear << endl;*/
+				cout << tmpRegistro.iID << ",";
+				cout << tmpRegistro.cEmployeeName << ",";
+				cout << tmpRegistro.cJobTitle << ",";
+				cout << tmpRegistro.fBasePay << ","; 
+				cout << tmpRegistro.fOvertimePay << ",";
+				cout << tmpRegistro.fOtherPay << ",";
+				cout << tmpRegistro.fBenefits << ",";
+				cout << tmpRegistro.fTotalPay << ",";
+				cout << tmpRegistro.fTotalPay_Benefits << ",";  
+				cout << tmpRegistro.iYear << endl;       
 			}
 
 			aArquivoBinario.close();
@@ -192,18 +245,32 @@ int main()
     
     while(iOpcao != 0)
     {
+		cout << "0 - Sair" << endl;
+		cout << "1 - Converter para binario" << endl;
+		cout << "2 - Imprimir todos registros" << endl;
+		cout << "3 - Imprimir registros entre intervalos de posicoes" << endl;
+		
 		cin >> iOpcao;
+		
 		if (iOpcao == 1)
 		{    
+			cout << "Convertendo para binario..." << endl;
 			converterCSVParaBinario(sNomeArquivo, sNomeArquivoBinario);
 		} else if (iOpcao == 2)
 		{
+			cout << "Imprimindo registros..." << endl;
 			imprimirArquivoBinario(sNomeArquivoBinario, -1, -1);
 		} else if (iOpcao == 3)
 		{
 			int iPosicaoInicial, iPosicaoFinal;
 			cin >> iPosicaoInicial >> iPosicaoFinal;
+			cout << "Imprimindo registros nas posicoes: " << iPosicaoInicial << " - " << iPosicaoFinal <<  "..." << endl;
 			imprimirArquivoBinario(sNomeArquivoBinario, iPosicaoInicial, iPosicaoFinal);
+		} else if (iOpcao == 4)
+		{
+			int iPosicao = 0;
+			cin >> iPosicao;
+			alterarRegistro(iPosicao);
 		}
 	}
 
