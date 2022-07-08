@@ -32,7 +32,7 @@ struct PayrollSaoFrancisco
     int iYear; // Ano      
 };
 
-void converterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSaida)
+void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSaida)
 {
 	PayrollSaoFrancisco TRegistro;
 
@@ -123,12 +123,7 @@ void converterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSa
     aArquivoSaida.close();
 }
 
-void alterarRegistro(int _iPosicao)
-{
-	
-}
-
-void imprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, int _iPosicaoFinal)
+void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, int _iPosicaoFinal)
 {
 	if ((_iPosicaoInicial == -1) and (_iPosicaoFinal == -1))
 	{
@@ -347,17 +342,17 @@ int main()
 		if (iOpcao == 1)
 		{    
 			cout << "Convertendo para binario..." << endl;
-			converterCSVParaBinario(sNomeArquivo, sNomeArquivoBinario);
+			fncConverterCSVParaBinario(sNomeArquivo, sNomeArquivoBinario);
 		} else if (iOpcao == 2)
 		{
 			cout << "Imprimindo registros..." << endl;
-			imprimirArquivoBinario(sNomeArquivoBinario, -1, -1);
+			fncImprimirArquivoBinario(sNomeArquivoBinario, -1, -1);
 		} else if (iOpcao == 3)
 		{
 			int iPosicaoInicial, iPosicaoFinal;
 			cin >> iPosicaoInicial >> iPosicaoFinal;
 			cout << "Imprimindo registros nas posicoes: " << iPosicaoInicial << " - " << iPosicaoFinal <<  "..." << endl;
-			imprimirArquivoBinario(sNomeArquivoBinario, iPosicaoInicial, iPosicaoFinal);
+			fncImprimirArquivoBinario(sNomeArquivoBinario, iPosicaoInicial, iPosicaoFinal);
 		} else if (iOpcao == 4)
 		{
 			int iPosicao = 0;
