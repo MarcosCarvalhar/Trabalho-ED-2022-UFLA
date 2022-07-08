@@ -320,9 +320,9 @@ PayrollSaoFrancisco fncLerRegistro()
 	cout << "Digite as informações do Registro: " << endl;
 	cout << "ID: "; 
 	cin >> tmpRegistro.iID;
-	cout << endl << "Nome do Funcionario: "; 
+	cout << "Nome do Funcionario: "; 
 	cin >> tmpRegistro.cEmployeeName;
-	cout << endl << "Cargo: ";
+	cout << "Cargo: ";
 	cin >> tmpRegistro.cJobTitle;
 	cout << "Pagamento Base: ";
 	cin >> tmpRegistro.fBasePay; 
