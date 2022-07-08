@@ -32,6 +32,7 @@ struct PayrollSaoFrancisco
     int iYear; // Ano      
 };
 
+// Função para converter para binário
 void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquivoSaida)
 {
 	PayrollSaoFrancisco TRegistro;
@@ -45,17 +46,21 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
         string sValorCampo;
         int iTamanho = 0;
         bool bLeuNomeCampo = false;
+        // Enquanto não estiver no fim do arquivo
         while(!aArquivoEntrada.eof())
         {
 			if (!bLeuNomeCampo)
 			{
+				// Ler o cabeçalho
 				getline(aArquivoEntrada, sNomeCampos);
 				bLeuNomeCampo = true;
 				cout << sNomeCampos << endl;
 			}
             getline(aArquivoEntrada, sValorCampo, ',');
+            // Se o ID da primeira posição não estiver vazio, então o arquivo tem informações.
             if (sValorCampo != "")
             {   
+				// Ler e converter as informações da linha para o registro
 				cout << sValorCampo << ","; 
 				
 				TRegistro.iID = std::stoi(sValorCampo);
@@ -110,7 +115,7 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 				TRegistro.iYear = std::stoi(sValorCampo);
 
 				cout << endl;
-				// reinterpret_cast<char *> 
+				// Escrever registro no arquivo
 				aArquivoSaida.write((const char *)(&TRegistro), sizeof(PayrollSaoFrancisco)); 
 			}
         }
@@ -123,8 +128,10 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
     aArquivoSaida.close();
 }
 
+// Função para imprimir registros.
 void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial, int _iPosicaoFinal)
 {
+	// Caso as posições forem = -1, então quer dizer que é para imprimir todos os registros
 	if ((_iPosicaoInicial == -1) and (_iPosicaoFinal == -1))
 	{
 		ifstream aArquivoBinario;
@@ -173,6 +180,8 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 		}
 	} else
 	{
+		// Caso contrário é posicionado na posição final para saber se os registros do intervalo são maiores que o total de registros do arquivo
+		// Caso sim, são impressos todos os registros daquele intervalo, caso contrário, são impressos até o final do arquivo.
 		ifstream aArquivoBinario;
 		aArquivoBinario.open(_sNomeArquivoBinario, ios::binary);
 		
@@ -180,8 +189,10 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 		
 		if (aArquivoBinario)
 		{
+			// Pegar quantidade de registros do arquivo
 			aArquivoBinario.seekg((_iPosicaoInicial * sizeof(PayrollSaoFrancisco)), aArquivoBinario.end);
-			int tam = aArquivoBinario.tellg();
+			int tam = aArquivoBinario.tellg(); 
+			
 			aArquivoBinario.seekg((_iPosicaoInicial * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
 
 			int numero_registros = 0;
@@ -225,10 +236,9 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 			cout << "Erro na leitura do arquivo!";
 		}
 	}
-
-	//aArquivoBinario.read(reinterpret_cast<char *> (&variavel), sizeof(tipo_dado_variavel));
 }
 
+// Função para alterar registro de uma determinada posição
 void fncAlterarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string _sNomeArquivo)
 {
 	fstream aArquivoBinario;
@@ -236,13 +246,18 @@ void fncAlterarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string 
 	
 	if (aArquivoBinario)
 	{
+		// Move para a posição informada pelo usuário e substitui as informações pelas do registro informado anteriormente.
 		aArquivoBinario.seekg((_iPosicao * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
 		aArquivoBinario.write((const char *)(&_TMPREGISTRO), sizeof(PayrollSaoFrancisco)); 
+	} else
+	{
+		cout << "Erro na leitura do arquivo!";
 	}
 	
 	aArquivoBinario.close();
 }
 
+// Função para adicionar registro entre posições, baseado na posição que for informada.
 void fncAdicionarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string _sNomeArquivo)
 {
 	fstream aArquivoBinario;
@@ -252,11 +267,15 @@ void fncAdicionarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, strin
 	{
 		aArquivoBinario.seekg((_iPosicao * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
 		aArquivoBinario.write((const char *)(&_TMPREGISTRO), sizeof(PayrollSaoFrancisco)); 
+	} else
+	{
+		cout << "Erro na leitura do arquivo!";
 	}
 	
 	aArquivoBinario.close();
 }
 
+// Função para trocar registros de posição
 void fncTrocarPosicao(int _iPrimeiraPosicao, int _iSegundaPosicao, string _sNomeArquivo)
 {	
 	PayrollSaoFrancisco PrimeiroRegistro, SegundoRegistro;
@@ -267,17 +286,22 @@ void fncTrocarPosicao(int _iPrimeiraPosicao, int _iSegundaPosicao, string _sNome
 	if (aArquivoBinario)
 	{
 		aArquivoBinario.seekg(0, aArquivoBinario.end);
-		//int tam = aArquivoBinario.tellg();
 		
+		// Movendo a posição de leitura para a primeira posicao
 		aArquivoBinario.seekg(_iPrimeiraPosicao * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+		// Lendo o primeiro registro da primeira posicao
 		aArquivoBinario.read(reinterpret_cast<char*>(&PrimeiroRegistro), sizeof(PayrollSaoFrancisco));
 		
+		// Movendo a leitura para a segunda posicao
 		aArquivoBinario.seekg(_iSegundaPosicao * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+		// Lendo o segundo registro da segunda posicao
 		aArquivoBinario.read(reinterpret_cast<char*>(&SegundoRegistro), sizeof(PayrollSaoFrancisco));
 				
+		// Movendo a posição de leitura para a primeira posição para colocar o segundo registro
 		aArquivoBinario.seekg((_iPrimeiraPosicao * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
 		aArquivoBinario.write((const char *)(&SegundoRegistro), sizeof(PayrollSaoFrancisco)); 
 		
+		// Movendo a posição de leitura para a segunda posição para colocar o primeiro registro
 		aArquivoBinario.seekg((_iSegundaPosicao * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
 		aArquivoBinario.write((const char *)(&PrimeiroRegistro), sizeof(PayrollSaoFrancisco)); 
 	
@@ -289,6 +313,7 @@ void fncTrocarPosicao(int _iPrimeiraPosicao, int _iSegundaPosicao, string _sNome
 	}
 }
 
+// Função para ler registro e evitar repetição de código
 PayrollSaoFrancisco fncLerRegistro()
 {
 	PayrollSaoFrancisco tmpRegistro;
