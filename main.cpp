@@ -133,23 +133,22 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 {	
 	std::cout.precision(2);
 	std::cout<<std::fixed;
-	// Caso as posições forem = -1, então quer dizer que é para imprimir todos os registros
-	if ((_iPosicaoInicial == -1) and (_iPosicaoFinal == -1))
+	ifstream aArquivoBinario;
+	aArquivoBinario.open(_sNomeArquivoBinario, ios::binary);
+	if (aArquivoBinario)
 	{
-		ifstream aArquivoBinario;
-		aArquivoBinario.open(_sNomeArquivoBinario, ios::binary);
-
-		if (aArquivoBinario)
+		// Caso as posições forem = -1, então quer dizer que é para imprimir todos os registros
+		if ((_iPosicaoInicial == -1) and (_iPosicaoFinal == -1))
 		{
 			aArquivoBinario.seekg(0, aArquivoBinario.end);
-			int tam = aArquivoBinario.tellg();
+			int iTamanho = aArquivoBinario.tellg();
 			aArquivoBinario.seekg(0, aArquivoBinario.beg);
 
-			int numero_registros = tam / sizeof(PayrollSaoFrancisco);
+			int iQtdRegistros = iTamanho / sizeof(PayrollSaoFrancisco);
 			
 			PayrollSaoFrancisco tmpRegistro;
 
-			for (int i = 0; i < numero_registros; i++) 
+			for (int i = 0; i < iQtdRegistros; i++) 
 			{      
 				aArquivoBinario.read(reinterpret_cast<char*>(&tmpRegistro), sizeof(PayrollSaoFrancisco));
 				/*cout << "ID: " << tmpRegistro.iID << ", ";
@@ -162,35 +161,25 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 				cout << "Pagamento Total: " << tmpRegistro.fTotalPay << ", ";
 				cout << "Pagamento Total com Beneficios: " << tmpRegistro.fTotalPay_Benefits << ", ";  
 				cout << "Ano: " << tmpRegistro.iYear << endl;*/
-				cout << tmpRegistro.iID << ",";
-				cout << tmpRegistro.cEmployeeName << ",";
-				cout << tmpRegistro.cJobTitle << ",";
-				cout << tmpRegistro.fBasePay << ","; 
-				cout << tmpRegistro.fOvertimePay << ",";
-				cout << tmpRegistro.fOtherPay << ",";
-				cout << tmpRegistro.fBenefits << ",";
-				cout << tmpRegistro.fTotalPay << ",";
-				cout << tmpRegistro.fTotalPay_Benefits << ",";  
-				cout << tmpRegistro.iYear << endl;    
+				// Deixada a impressão de forma que facilite a comparação de valores
+				cout << tmpRegistro.iID << ", ";
+				cout << tmpRegistro.cEmployeeName << ", ";
+				cout << tmpRegistro.cJobTitle << ", ";
+				cout << tmpRegistro.fBasePay << ", "; 
+				cout << tmpRegistro.fOvertimePay << ", ";
+				cout << tmpRegistro.fOtherPay << ", ";
+				cout << tmpRegistro.fBenefits << ", ";
+				cout << tmpRegistro.fTotalPay << ", ";
+				cout << tmpRegistro.fTotalPay_Benefits << ", ";  
+				cout << tmpRegistro.iYear << endl;      
 			}
-
-			aArquivoBinario.close();
-		}
-		else
+		} else
 		{
-			cout << "Erro na leitura do arquivo!";
-		}
-	} else
-	{
-		// Caso contrário é posicionado na posição final para saber se os registros do intervalo são maiores que o total de registros do arquivo
-		// Caso sim, são impressos todos os registros daquele intervalo, caso contrário, são impressos até o final do arquivo.
-		ifstream aArquivoBinario;
-		aArquivoBinario.open(_sNomeArquivoBinario, ios::binary);
-		
-		int iQuantidadeRegistros = _iPosicaoFinal - _iPosicaoInicial + 1;
-		
-		if (aArquivoBinario)
-		{
+			// Caso contrário é posicionado na posição final para saber se os registros do intervalo são maiores que o total de registros do arquivo
+			// Caso sim, são impressos todos os registros daquele intervalo, caso contrário, são impressos até o final do arquivo.
+			
+			int iQuantidadeRegistros = _iPosicaoFinal - _iPosicaoInicial + 1;
+			
 			// Pegar quantidade de registros do arquivo
 			aArquivoBinario.seekg((_iPosicaoInicial * sizeof(PayrollSaoFrancisco)), aArquivoBinario.end);
 			int iQuantidadeRegArquivo = aArquivoBinario.tellg();
@@ -219,25 +208,26 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 				cout << "Pagamento Total: " << tmpRegistro.fTotalPay << ", ";
 				cout << "Pagamento Total com Beneficios: " << tmpRegistro.fTotalPay_Benefits << ", ";  
 				cout << "Ano: " << tmpRegistro.iYear << endl;*/
-				cout << tmpRegistro.iID << ",";
-				cout << tmpRegistro.cEmployeeName << ",";
-				cout << tmpRegistro.cJobTitle << ",";
-				cout << tmpRegistro.fBasePay << ","; 
-				cout << tmpRegistro.fOvertimePay << ",";
-				cout << tmpRegistro.fOtherPay << ",";
-				cout << tmpRegistro.fBenefits << ",";
-				cout << tmpRegistro.fTotalPay << ",";
-				cout << tmpRegistro.fTotalPay_Benefits << ",";  
+				// Deixada a impressão de forma que facilite a comparação de valores
+				cout << tmpRegistro.iID << ", ";
+				cout << tmpRegistro.cEmployeeName << ", ";
+				cout << tmpRegistro.cJobTitle << ", ";
+				cout << tmpRegistro.fBasePay << ", "; 
+				cout << tmpRegistro.fOvertimePay << ", ";
+				cout << tmpRegistro.fOtherPay << ", ";
+				cout << tmpRegistro.fBenefits << ", ";
+				cout << tmpRegistro.fTotalPay << ", ";
+				cout << tmpRegistro.fTotalPay_Benefits << ", ";  
 				cout << tmpRegistro.iYear << endl;       
 			}
-
-			aArquivoBinario.close();
-		}
-		else
-		{
-			cout << "Erro na leitura do arquivo!";
 		}
 	}
+	else
+	{
+		cout << "Erro na leitura do arquivo!";
+	}
+	
+	aArquivoBinario.close();
 }
 
 // Função para alterar registro de uma determinada posição
@@ -249,7 +239,7 @@ void fncAlterarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string 
 	if (aArquivoBinario)
 	{
 		// Move para a posição informada pelo usuário e substitui as informações pelas do registro informado anteriormente.
-		aArquivoBinario.seekp(((_iPosicao-1) * sizeof(PayrollSaoFrancisco)), aArquivoBinario.cur);
+		aArquivoBinario.seekp(((_iPosicao) * sizeof(PayrollSaoFrancisco)), aArquivoBinario.cur);
 		aArquivoBinario.write((const char *)(&_TMPREGISTRO), sizeof(PayrollSaoFrancisco)); 
 	} else
 	{
@@ -263,7 +253,7 @@ void fncAlterarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string 
 void fncAdicionarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string _sNomeArquivo)
 {
 	fstream aArquivoBinario;
-	aArquivoBinario.open(_sNomeArquivo, std::ios::binary | ios::in | ios ::out);
+	aArquivoBinario.open(_sNomeArquivo, ios::binary | ios::in | ios ::out);
 	
 	if (aArquivoBinario)
 	{
@@ -284,22 +274,47 @@ void fncAdicionarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, strin
 		// Incrementar para já começar para a proxima
 		int iPosRelativa = _iPosicao+1;
 		int iTamanhoMaximo = 0;
+		// Posicionar na posicao inicial até o final para pegar a posição máxima do arquivo.
 		aArquivoBinario.seekg(0, aArquivoBinario.end);
 		iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
+		// Posicionar na poiscao relativa (na próxima posição) para leitura
 		aArquivoBinario.seekg((iPosRelativa) * sizeof(PayrollSaoFrancisco));
+		// Armazenando o que estava na posição relativa em memória RAM
 		aArquivoBinario.read(reinterpret_cast<char*>(&RegistroAnterior), sizeof(PayrollSaoFrancisco));
+		// Movido para posição de escrita na posição relativa.
 		aArquivoBinario.seekp((iPosRelativa) * sizeof(PayrollSaoFrancisco));
 		while (iPosRelativa < iTamanhoMaximo)
 		{
+			// Escrever na posição relativa o registro que havia sido lido da posição anterior a posição relativa
 			aArquivoBinario.seekp((iPosRelativa) * sizeof(PayrollSaoFrancisco));
 			aArquivoBinario.write((const char *)(&NovoRegistro), sizeof(PayrollSaoFrancisco));
 			
+			// O Novo registro a ser escrito na proxima posição é o que acabou de ser substituido (no arquivo) da posição relativa
 			NovoRegistro = RegistroAnterior;
 			
 			iPosRelativa++;		
+			// Ler o próximo registro para que o registro que foi lido anteriormente possa ser colocado nesse lugar agora
 			aArquivoBinario.seekg((iPosRelativa) * sizeof(PayrollSaoFrancisco));
 			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroAnterior), sizeof(PayrollSaoFrancisco));	
 		}
+	} else
+	{
+		cout << "Erro na leitura do arquivo!";
+	}
+	
+	aArquivoBinario.close();
+}
+
+// Função para inserir um registro no final do arquivo
+void fncInserirNoFinal(PayrollSaoFrancisco _TMPREGISTRO, string _sNomeArquivo)
+{
+	fstream aArquivoBinario;
+	aArquivoBinario.open(_sNomeArquivo, ios::in | ios ::out);
+	
+	if (aArquivoBinario)
+	{
+		aArquivoBinario.seekp(0, aArquivoBinario.end);
+		aArquivoBinario.write((const char *)(&_TMPREGISTRO), sizeof(PayrollSaoFrancisco)); 
 	} else
 	{
 		cout << "Erro na leitura do arquivo!";
@@ -335,13 +350,13 @@ void fncTrocarPosicao(int _iPrimeiraPosicao, int _iSegundaPosicao, string _sNome
 		// Movendo a posição de leitura para a segunda posição para colocar o primeiro registro
 		aArquivoBinario.seekp(((_iSegundaPosicao-1) * sizeof(PayrollSaoFrancisco)));
 		aArquivoBinario.write((const char *)(&PrimeiroRegistro), sizeof(PayrollSaoFrancisco)); 
-	
-		aArquivoBinario.close();
 	}
 	else
 	{
 		cout << "Erro na leitura do arquivo!";
 	}
+	
+	aArquivoBinario.close();
 }
 
 // Função para ler registro e evitar repetição de código
@@ -408,9 +423,10 @@ int main()
 		cout << "1 - Converter para binario" << endl; // OK
 		cout << "2 - Imprimir todos registros" << endl; // OK
 		cout << "3 - Imprimir registros entre intervalos de posicoes" << endl; // OK
-		cout << "4 - Adicionar um registro em uma posicao especifica" << endl;
+		cout << "4 - Adicionar um registro em uma posicao especifica" << endl; // OK
 		cout << "5 - Trocar elementos de posicao" << endl; // OK
 		cout << "6 - Alterar dados de um registro de uma posicao" << endl; // OK
+		cout << "7 - Inserir registro no final" << endl; // OK
 		cout << "=============================================================" << endl;
 		
 		cin >> iOpcao;
@@ -460,6 +476,17 @@ int main()
 			PayrollSaoFrancisco TmpRegistro = fncLerRegistro();
 			cout << "Alterando registro..." << endl;
 			fncAlterarRegistro(iPosicao, TmpRegistro, sNomeArquivoBinario);	
+		} else if (iOpcao == 7)
+		{
+			PayrollSaoFrancisco TmpRegistro = fncLerRegistro();
+			cout << "Inserindo registro no final..." << endl;
+			fncInserirNoFinal(TmpRegistro, sNomeArquivoBinario);
+		} else if (iOpcao == 0)
+		{
+			cout << "Saindo..." << endl;
+		} else
+		{
+			cout << "Opcao nao encontrada..." << endl;
 		}
 	}
 
