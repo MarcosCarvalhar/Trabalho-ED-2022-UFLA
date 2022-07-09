@@ -54,19 +54,19 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 				// Ler o cabeçalho
 				getline(aArquivoEntrada, sNomeCampos);
 				bLeuNomeCampo = true;
-				cout << sNomeCampos << endl;
+				//cout << sNomeCampos << endl;
 			}
             getline(aArquivoEntrada, sValorCampo, ',');
             // Se o ID da primeira posição não estiver vazio, então o arquivo tem informações.
             if (sValorCampo != "")
             {   
 				// Ler e converter as informações da linha para o registro
-				cout << sValorCampo << ","; 
+				//cout << sValorCampo << ","; 
 				
 				TRegistro.iID = std::stoi(sValorCampo);
 				
 				getline(aArquivoEntrada, sValorCampo, ','); 
-				cout << sValorCampo << ",";
+				//cout << sValorCampo << ",";
 				iTamanho = sValorCampo.size();
 				for (int i = 0; i < iTamanho; i++)
 				{
@@ -75,7 +75,7 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 				(TRegistro.cEmployeeName)[iTamanho] = '\0';				
 				
 				getline(aArquivoEntrada, sValorCampo, ','); 
-				cout << sValorCampo << ","; 
+				//cout << sValorCampo << ","; 
 				iTamanho = sValorCampo.size();
 				for (int i = 0; i < iTamanho; i++)
 				{
@@ -85,36 +85,36 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 				(TRegistro.cJobTitle)[iTamanho] = '\0';
 				
 				getline(aArquivoEntrada, sValorCampo, ',');  
-				cout << sValorCampo << ",";
+				//cout << sValorCampo << ",";
 				TRegistro.fBasePay = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo, ',');  
-				cout << sValorCampo << ",";
+				//cout << sValorCampo << ",";
 				TRegistro.fOvertimePay = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo, ',');
 				if (sValorCampo == "Not Provided")
 					sValorCampo = '0';
-				cout << sValorCampo << ",";  
+				//cout << sValorCampo << ",";  
 				TRegistro.fOtherPay = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo, ',');
-				cout << sValorCampo << ",";    
+				//cout << sValorCampo << ",";    
 				TRegistro.fBenefits = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo, ',');
-				cout << sValorCampo << ",";    
+				//cout << sValorCampo << ",";    
 				TRegistro.fTotalPay = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo, ',');
-				cout << sValorCampo << ",";  
+				//cout << sValorCampo << ",";  
 				TRegistro.fTotalPay_Benefits = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo); 
-				cout << sValorCampo; 
+				//cout << sValorCampo; 
 				TRegistro.iYear = std::stoi(sValorCampo);
 
-				cout << endl;
+				//cout << endl;
 				// Escrever registro no arquivo
 				aArquivoSaida.write((const char *)(&TRegistro), sizeof(PayrollSaoFrancisco)); 
 			}
@@ -249,7 +249,7 @@ void fncAlterarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string 
 	if (aArquivoBinario)
 	{
 		// Move para a posição informada pelo usuário e substitui as informações pelas do registro informado anteriormente.
-		aArquivoBinario.seekg((_iPosicao * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
+		aArquivoBinario.seekp(((_iPosicao-1) * sizeof(PayrollSaoFrancisco)), aArquivoBinario.cur);
 		aArquivoBinario.write((const char *)(&_TMPREGISTRO), sizeof(PayrollSaoFrancisco)); 
 	} else
 	{
@@ -268,12 +268,12 @@ void fncAdicionarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, strin
 	if (aArquivoBinario)
 	{
 		// Peguei o registro da posicao informada e substitui no arquivo pelo novo registro
-		aArquivoBinario.seekg(((_iPosicao-1) * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
+		aArquivoBinario.seekg(((_iPosicao) * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
 		PayrollSaoFrancisco NovoRegistro;
 		aArquivoBinario.read(reinterpret_cast<char*>(&NovoRegistro), sizeof(PayrollSaoFrancisco));
 		//aArquivoBinario.write((const char *)(&_TMPREGISTRO), sizeof(PayrollSaoFrancisco)); 
 		
-		int iPosRelativa = _iPosicao-1;
+		int iPosRelativa = _iPosicao+1;
 		int iTamanhoMaximo = 0;
 		aArquivoBinario.seekg(0, aArquivoBinario.end);
 		iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
@@ -282,16 +282,16 @@ void fncAdicionarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, strin
 		{
 			PayrollSaoFrancisco RegistroAnterior;
 			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroAnterior), sizeof(PayrollSaoFrancisco));
-			cout << iPosRelativa << "-"<< RegistroAnterior.cEmployeeName << endl;
+			cout << iPosRelativa << "-"<< RegistroAnterior.cEmployeeName << "-" << NovoRegistro.cEmployeeName << endl;
 			aArquivoBinario.write((const char *)(&NovoRegistro), sizeof(PayrollSaoFrancisco));
 			
 			NovoRegistro = RegistroAnterior;
 			
 			iPosRelativa++;		
-			aArquivoBinario.seekg((iPosRelativa) * sizeof(PayrollSaoFrancisco), ios::cur);	
+			//aArquivoBinario.seekg((iPosRelativa) * sizeof(PayrollSaoFrancisco), ios::cur);	
 		}
 		// Para adicionar o ultimo registro
-		aArquivoBinario.write((const char *)(&NovoRegistro), sizeof(PayrollSaoFrancisco)); 
+		//aArquivoBinario.write((const char *)(&NovoRegistro), sizeof(PayrollSaoFrancisco)); 
 	} else
 	{
 		cout << "Erro na leitura do arquivo!";
@@ -306,28 +306,26 @@ void fncTrocarPosicao(int _iPrimeiraPosicao, int _iSegundaPosicao, string _sNome
 	PayrollSaoFrancisco PrimeiroRegistro, SegundoRegistro;
 	
 	fstream aArquivoBinario;
-	aArquivoBinario.open(_sNomeArquivo, ios::in | ios ::out);
+	aArquivoBinario.open(_sNomeArquivo, std::ios::binary |ios::in | ios ::out);
 
 	if (aArquivoBinario)
-	{
-		aArquivoBinario.seekg(0, aArquivoBinario.end);
-		
+	{		
 		// Movendo a posição de leitura para a primeira posicao
-		aArquivoBinario.seekg(_iPrimeiraPosicao * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+		aArquivoBinario.seekg((_iPrimeiraPosicao-1) * sizeof(PayrollSaoFrancisco));
 		// Lendo o primeiro registro da primeira posicao
-		aArquivoBinario.read(reinterpret_cast<char*>(&PrimeiroRegistro), sizeof(PayrollSaoFrancisco));
+		aArquivoBinario.read((char *)(&PrimeiroRegistro), sizeof(PayrollSaoFrancisco));
 		
 		// Movendo a leitura para a segunda posicao
-		aArquivoBinario.seekg(_iSegundaPosicao * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+		aArquivoBinario.seekg((_iSegundaPosicao-1) * sizeof(PayrollSaoFrancisco));
 		// Lendo o segundo registro da segunda posicao
-		aArquivoBinario.read(reinterpret_cast<char*>(&SegundoRegistro), sizeof(PayrollSaoFrancisco));
-				
+		aArquivoBinario.read((char *)(&SegundoRegistro), sizeof(PayrollSaoFrancisco));
+			
 		// Movendo a posição de leitura para a primeira posição para colocar o segundo registro
-		aArquivoBinario.seekg((_iPrimeiraPosicao * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
+		aArquivoBinario.seekp(((_iPrimeiraPosicao-1) * sizeof(PayrollSaoFrancisco)));
 		aArquivoBinario.write((const char *)(&SegundoRegistro), sizeof(PayrollSaoFrancisco)); 
 		
 		// Movendo a posição de leitura para a segunda posição para colocar o primeiro registro
-		aArquivoBinario.seekg((_iSegundaPosicao * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
+		aArquivoBinario.seekp(((_iSegundaPosicao-1) * sizeof(PayrollSaoFrancisco)));
 		aArquivoBinario.write((const char *)(&PrimeiroRegistro), sizeof(PayrollSaoFrancisco)); 
 	
 		aArquivoBinario.close();
