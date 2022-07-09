@@ -263,35 +263,43 @@ void fncAlterarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string 
 void fncAdicionarRegistro(int _iPosicao, PayrollSaoFrancisco _TMPREGISTRO, string _sNomeArquivo)
 {
 	fstream aArquivoBinario;
-	aArquivoBinario.open(_sNomeArquivo, ios::in | ios ::out);
+	aArquivoBinario.open(_sNomeArquivo, std::ios::binary | ios::in | ios ::out);
 	
 	if (aArquivoBinario)
 	{
-		// Peguei o registro da posicao informada e substitui no arquivo pelo novo registro
-		aArquivoBinario.seekg(((_iPosicao) * sizeof(PayrollSaoFrancisco)), aArquivoBinario.beg);
+		// Inserir registro vazio no final para já alocar uma posição no arquivo.
+		PayrollSaoFrancisco RegistroVazio = {-999, "", "", 0, 0, 0, 0, 0, 0, 0};
+		aArquivoBinario.seekp(0, aArquivoBinario.end);
+		aArquivoBinario.write((const char *)(&RegistroVazio), sizeof(PayrollSaoFrancisco));
+		
+		// Peguei o registro anterior da posicao informada
+		aArquivoBinario.seekg(((_iPosicao) * sizeof(PayrollSaoFrancisco)));
 		PayrollSaoFrancisco NovoRegistro;
 		aArquivoBinario.read(reinterpret_cast<char*>(&NovoRegistro), sizeof(PayrollSaoFrancisco));
-		//aArquivoBinario.write((const char *)(&_TMPREGISTRO), sizeof(PayrollSaoFrancisco)); 
+		// Escrito o novo registro na posicao informada
+		aArquivoBinario.seekp(((_iPosicao) * sizeof(PayrollSaoFrancisco)));
+		aArquivoBinario.write((const char *)(&_TMPREGISTRO), sizeof(PayrollSaoFrancisco)); 
 		
+		PayrollSaoFrancisco RegistroAnterior;
+		// Incrementar para já começar para a proxima
 		int iPosRelativa = _iPosicao+1;
 		int iTamanhoMaximo = 0;
 		aArquivoBinario.seekg(0, aArquivoBinario.end);
 		iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
-		aArquivoBinario.seekg((iPosRelativa) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+		aArquivoBinario.seekg((iPosRelativa) * sizeof(PayrollSaoFrancisco));
+		aArquivoBinario.read(reinterpret_cast<char*>(&RegistroAnterior), sizeof(PayrollSaoFrancisco));
+		aArquivoBinario.seekp((iPosRelativa) * sizeof(PayrollSaoFrancisco));
 		while (iPosRelativa < iTamanhoMaximo)
 		{
-			PayrollSaoFrancisco RegistroAnterior;
-			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroAnterior), sizeof(PayrollSaoFrancisco));
-			cout << iPosRelativa << "-"<< RegistroAnterior.cEmployeeName << "-" << NovoRegistro.cEmployeeName << endl;
+			aArquivoBinario.seekp((iPosRelativa) * sizeof(PayrollSaoFrancisco));
 			aArquivoBinario.write((const char *)(&NovoRegistro), sizeof(PayrollSaoFrancisco));
 			
 			NovoRegistro = RegistroAnterior;
 			
 			iPosRelativa++;		
-			//aArquivoBinario.seekg((iPosRelativa) * sizeof(PayrollSaoFrancisco), ios::cur);	
+			aArquivoBinario.seekg((iPosRelativa) * sizeof(PayrollSaoFrancisco));
+			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroAnterior), sizeof(PayrollSaoFrancisco));	
 		}
-		// Para adicionar o ultimo registro
-		//aArquivoBinario.write((const char *)(&NovoRegistro), sizeof(PayrollSaoFrancisco)); 
 	} else
 	{
 		cout << "Erro na leitura do arquivo!";
@@ -306,7 +314,7 @@ void fncTrocarPosicao(int _iPrimeiraPosicao, int _iSegundaPosicao, string _sNome
 	PayrollSaoFrancisco PrimeiroRegistro, SegundoRegistro;
 	
 	fstream aArquivoBinario;
-	aArquivoBinario.open(_sNomeArquivo, std::ios::binary |ios::in | ios ::out);
+	aArquivoBinario.open(_sNomeArquivo, ios::binary | ios::in | ios ::out);
 
 	if (aArquivoBinario)
 	{		
