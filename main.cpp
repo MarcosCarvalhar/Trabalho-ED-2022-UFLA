@@ -437,121 +437,69 @@ int fncComparaRegistro(PayrollSaoFrancisco _TMPREGISTRO1, PayrollSaoFrancisco _T
 	}
 }
 
-class MinHeap 
-{    
-	private:
-		PayrollSaoFrancisco *Heap;
-		int iCapacidade;
-		int iTamanho;
-	public:
-		MinHeap(int cap);
-		MinHeap(PayrollSaoFrancisco vet[], int tam) 
-		{
-			iCapacidade = tam;
-			Heap = new PayrollSaoFrancisco[iCapacidade];
-			for (int i = 0; i < tam; i++)
-			{
-				Heap[i] = vet[i];
-			}
-			/* 
-				pode usar a função memcpy da biblioteca cstring
-				memcpy(heap, vet, tam * sizeof(dado));
-			*/
-			iTamanho = tam;
-			fncArruma();
-		};
-		int fncGetTamanho()
-		{
-			return iTamanho;
-		}
-		void inserir(PayrollSaoFrancisco _Registro) 
-		{
-			if (iTamanho == iCapacidade) {
-				cerr << "Erro ao inserir" << endl;
-				exit(EXIT_FAILURE);
-			}
-			Heap[iTamanho] = _Registro;
-			corrigeSubindo(iTamanho);
-			iTamanho++;
-		}
-		void imprime() {
-			cout << "IMPRIMINDO" << endl;
-			for (int i = 0; i < iTamanho; i++)
-			{
-				cout << Heap[i].cJobTitle << " " << endl;
-			}
-			cout << endl;
-		}
-		PayrollSaoFrancisco retiraRaiz() {
-			if (iTamanho == 0) {
-				cerr << "Erro ao retirar raiz" << endl;
-				exit(EXIT_FAILURE);
-			}
-			PayrollSaoFrancisco _Aux = Heap[0];
-			Heap[0] = Heap[iTamanho-1];
-			Heap[iTamanho-1] = _Aux;
-			iTamanho--;
-			corrigeDescendo(0);
-			return _Aux;
-		}
-		PayrollSaoFrancisco espiaRaiz() {
-			return Heap[0];
-		}
-		inline int fncPai(int i) {
-			return (i-1) / 2;
-		}
-		inline int fncEsquerdo(int i) {
-			return 2*i+1;
-		}
-		inline int fncDireito(int i) {
-			return 2*i+2;
-		}
-		void fncArruma() {
-			for (int i = (iTamanho/2-1); i >= 0; i--)
-			{
-				corrigeDescendo(i);
-			}
-		}
-		void corrigeDescendo(int i) {
-			int esq = fncEsquerdo(i);
-			int dir = fncDireito(i);
-			int menor = i;
+void swapping(PayrollSaoFrancisco &a, PayrollSaoFrancisco &b) {     //swap the content of a and b
+   PayrollSaoFrancisco temp;
+   temp = a;
+   a = b;
+   b = temp;
+}
 
-			if ((esq < iTamanho) and fncComparaRegistro(Heap[esq], Heap[menor]) == 1) {
-				menor = esq;
-			}
-			
-			if ((dir < iTamanho) and fncComparaRegistro(Heap[dir], Heap[menor]) == 1) {
-				menor = dir;
-			}
+void display(PayrollSaoFrancisco *array, int size) {
+   for(int i = 0; i<size; i++)
+      cout << array[i].iID << " ";
+   cout << endl;
+}
+void merge(PayrollSaoFrancisco *array, int l, int m, int r) {
+   int i, j, k, nl, nr;
+   //size of left and right sub-arrays
+   nl = m-l+1; nr = r-m;
+   PayrollSaoFrancisco larr[nl], rarr[nr];
+   //fill left and right sub-arrays
+   for(i = 0; i<nl; i++)
+      larr[i] = array[l+i];
+   for(j = 0; j<nr; j++)
+      rarr[j] = array[m+1+j];
+   i = 0; j = 0; k = l;
+   
+   //marge temp arrays to real array
+   while(i < nl && j<nr) {
+      if(fncComparaRegistro(larr[i], rarr[j]) == 1) {
+         array[k] = larr[i];
+         i++;
+      }else{
+         array[k] = rarr[j];
+         j++;
+      }
+      k++;
+   }
+   
+   while(i<nl) {       //extra element in left array
+      array[k] = larr[i];
+      i++; k++;
+   }
+   
+   while(j<nr) {     //extra element in right array
+      array[k] = rarr[j];
+      j++; k++;
+   }
+}
 
-			if (menor != i) {
-				PayrollSaoFrancisco Aux = Heap[i];
-				Heap[i] = Heap[menor];
-				Heap[menor] = Aux;
-				corrigeDescendo(menor);
-			}
-		}
-		void corrigeSubindo(int i) {
-			int p = fncPai(i);
-			if (fncComparaRegistro(Heap[i], Heap[p]) == 1) {
-				PayrollSaoFrancisco Aux = Heap[i];
-				Heap[i] = Heap[p];
-				Heap[p] = Aux;
-				corrigeSubindo(p);
-			}
-		}
-		~MinHeap(){
-			delete[] Heap;
-		}
-};
+void mergeSort(PayrollSaoFrancisco *array, int l, int r) {
+   if(l < r) {
+      int m = l+(r-l)/2;
+      // Sort first and second arrays
+      mergeSort(array, l, m);
+      mergeSort(array, m+1, r);
+      merge(array, l, m, r);
+   }
+}
 
 void pcdOrdenar(string _sNomeArquivo)
 {
 	// Primeiro passo é copiar
 	
 	fstream aArquivoBinario;
-	aArquivoBinario.open(_sNomeArquivo, ios::in | ios ::out);
+	aArquivoBinario.open(_sNomeArquivo, ios::in | ios ::out | ios::binary);
 	
 	if (aArquivoBinario)
 	{		
@@ -566,53 +514,24 @@ void pcdOrdenar(string _sNomeArquivo)
 		{
 			PayrollSaoFrancisco RegistroComparacao;
 			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
-			
-			//aArquivoBinario.seekg(0, aArquivoBinario.beg);
-			//int iContadorTemporario = 0;
-			//cout << iPosAtual << " - " << RegistroComparacao.cJobTitle << endl;
-			/*while (iPosAtual > iContadorTemporario)
-			{
-				PayrollSaoFrancisco RegistroTemporario;
-				aArquivoBinario.read(reinterpret_cast<char*>(&RegistroTemporario), sizeof(PayrollSaoFrancisco));
-				
-				int iResultComparacao = fncComparaRegistro(RegistroComparacao, RegistroTemporario);
-				
-				//cout << "COMPARACAO: " << iResultComparacao << " >> " << iContadorTemporario << " - "<< RegistroComparacao.cJobTitle << " - " << RegistroTemporario.cJobTitle << endl;
-				
-				if (iResultComparacao == 2)
-				{
-					fncTrocarPosicao(iPosAtual, iContadorTemporario, _sNomeArquivo);
-					//cout << "TROCOU " << iPosAtual << " - " << iContadorTemporario << " =========================================" << endl;
-					fncImprimirArquivoBinario(_sNomeArquivo, -1, -1);
-					//cout << "TROCOU =========================================" << endl;
-				}
-
-				iContadorTemporario++;
-			}	*/
-			
+						
 			vet[iContRegistros] = RegistroComparacao;
+			iContRegistros++;
+			cout << iPosAtual << " - Inserindo Registro: " << RegistroComparacao.cJobTitle << " : " << RegistroComparacao.fOvertimePay << endl;
 			
-			if ((iContRegistros > 9) or ((iPosAtual+1) >= iTamanhoMaximo))
+			if ((iContRegistros > 9) or ((iPosAtual) >= iTamanhoMaximo))
 			{
-				cout << "ORDENANDO - " << iContRegistros << " - " << iPosAtual << " - " << iTamanhoMaximo << endl;
-				MinHeap *h = new MinHeap(vet, (iContRegistros));
-				cout << "POSICAO SEEKP: " << (iPosAtual-(iContRegistros)) * sizeof(PayrollSaoFrancisco) << endl;
-				aArquivoBinario.seekp((iPosAtual-(iContRegistros)) * sizeof(PayrollSaoFrancisco));
-				cout << "PASSOU DO SEEKP" << endl;
+				mergeSort(vet, 0, iContRegistros);
+				cout << "ORDENANDO - " << iContRegistros << " - " << (iPosAtual+1) << " - " << iTamanhoMaximo << endl;
+
 				for (int i = 0; i < (iContRegistros); i++)
 				{
-					cout << "TAMANHO DO HEAP: ";
-					cout << h->fncGetTamanho() << endl;
-					PayrollSaoFrancisco tmpRegistro = h->retiraRaiz();
-					cout << "RAIZ: " << tmpRegistro.cJobTitle << endl;
-					fncAlterarRegistro(((iPosAtual-(iContRegistros))+i), tmpRegistro, _sNomeArquivo);
-					//cout << h->retiraRaiz().cJobTitle << endl;
-				}
-				delete h;
+					cout << ((iPosAtual+1)-(iContRegistros))+i << " - RAIZ: " << vet[i].cJobTitle << " : " << vet[i].fOvertimePay << endl;
+					fncAlterarRegistro((((iPosAtual+1)-(iContRegistros))+i), vet[i], _sNomeArquivo);
+				}				
 				iContRegistros = 0;
-				//aArquivoBinario.seekg((iPosAtual+1) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+				aArquivoBinario.seekg((iPosAtual+1) * sizeof(PayrollSaoFrancisco));
 			}
-			iContRegistros++;
 			iPosAtual++;		
 			//aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco));	
 		}
