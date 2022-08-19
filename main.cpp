@@ -494,6 +494,23 @@ void mergeSort(PayrollSaoFrancisco *array, int l, int r) {
    }
 }
 
+PayrollSaoFrancisco *fncAlocarVetor(PayrollSaoFrancisco *_vet, int iTamanhoNovo)
+{
+	PayrollSaoFrancisco *novoVetor = new PayrollSaoFrancisco[iTamanhoNovo];
+	
+	cout << "TAM: " << iTamanhoNovo << endl;
+	//memcpy(novoVetor, _vet, (iTamanhoNovo * sizeof(PayrollSaoFrancisco)));
+	for (int i = 0; i < iTamanhoNovo - 1; i++)
+	{
+		novoVetor[i] = _vet[i];
+	}
+	
+	cout << novoVetor[0].cJobTitle << endl;
+	
+	delete[] _vet;
+	return novoVetor;
+} 
+
 void pcdOrdenar(string _sNomeArquivo)
 {
 	// Primeiro passo é copiar
@@ -508,35 +525,46 @@ void pcdOrdenar(string _sNomeArquivo)
 		aArquivoBinario.seekg(0, aArquivoBinario.end);
 		iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
 		aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
-		PayrollSaoFrancisco vet[10];
+		PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[1];
 		int iContRegistros = 0;
 		while (iPosAtual < iTamanhoMaximo)
 		{
 			PayrollSaoFrancisco RegistroComparacao;
 			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
 						
-			vet[iContRegistros] = RegistroComparacao;
+			vet[iContRegistros] = RegistroComparacao;       
 			iContRegistros++;
-			cout << iPosAtual << " - Inserindo Registro: " << RegistroComparacao.cJobTitle << " : " << RegistroComparacao.fOvertimePay << endl;
 			
 			if ((iContRegistros > 9) or ((iPosAtual) >= iTamanhoMaximo))
 			{
-				mergeSort(vet, 0, iContRegistros);
-				cout << "ORDENANDO - " << iContRegistros << " - " << (iPosAtual+1) << " - " << iTamanhoMaximo << endl;
-
-				for (int i = 0; i < (iContRegistros); i++)
+				mergeSort(vet, 0, iContRegistros-1);
+				/*for (int i = 0; i < (iContRegistros); i++)
 				{
 					cout << ((iPosAtual+1)-(iContRegistros))+i << " - RAIZ: " << vet[i].cJobTitle << " : " << vet[i].fOvertimePay << endl;
-					fncAlterarRegistro((((iPosAtual+1)-(iContRegistros))+i), vet[i], _sNomeArquivo);
-				}				
+					cout << (iContRegistros) << " - " << i << " -- ";
+					cout << vet[i].iID << ", ";
+					cout << vet[i].cEmployeeName << ", ";
+					cout << vet[i].cJobTitle << ", ";
+					cout << vet[i].fBasePay << ", "; 
+					cout << vet[i].fOvertimePay << ", ";
+					cout << vet[i].fOtherPay << ", ";
+					cout << vet[i].fBenefits << ", ";
+					cout << vet[i].fTotalPay << ", ";
+					cout << vet[i].fTotalPay_Benefits << ", ";  
+					cout << vet[i].iYear << endl;       
+					aArquivoBinario.seekp(((((iPosAtual+1)-(iContRegistros))+i) * sizeof(PayrollSaoFrancisco)));
+					aArquivoBinario.write((const char *)(&vet[i]), sizeof(PayrollSaoFrancisco));
+				}*/
 				iContRegistros = 0;
 				aArquivoBinario.seekg((iPosAtual+1) * sizeof(PayrollSaoFrancisco));
 			}
-			iPosAtual++;		
-			//aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco));	
+			
+			iPosAtual++;
+			if (((iPosAtual) < iTamanhoMaximo))
+			{
+				vet = fncAlocarVetor(vet, iContRegistros+1);
+			}	
 		}
-		// Para adicionar o ultimo registro
-		//aArquivoBinario.write((const char *)(&NovoRegistro), sizeof(PayrollSaoFrancisco)); 
 	} else
 	{
 		cout << "Erro na leitura do arquivo!";
