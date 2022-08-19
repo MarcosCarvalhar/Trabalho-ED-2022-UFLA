@@ -437,60 +437,64 @@ int fncComparaRegistro(PayrollSaoFrancisco _TMPREGISTRO1, PayrollSaoFrancisco _T
 	}
 }
 
-void swapping(PayrollSaoFrancisco &a, PayrollSaoFrancisco &b) {     //swap the content of a and b
-   PayrollSaoFrancisco temp;
-   temp = a;
-   a = b;
-   b = temp;
+void merge(PayrollSaoFrancisco *_Vetor, int _iEsquerda, int m, int _iDireita) {
+	int i, j, k, nl, nr;
+	//size of left and right sub-arrays
+	nl = m - _iEsquerda + 1; 
+	nr = _iDireita - m;
+	PayrollSaoFrancisco larr[nl];
+	PayrollSaoFrancisco rarr[nr];
+	
+	//fill left and right sub-arrays
+	for(i = 0; i<nl; i++)
+	{
+      larr[i] = _Vetor[_iEsquerda + i];
+	}
+	for (j = 0; j<nr; j++)
+	{
+		rarr[j] = _Vetor[m + 1 + j];
+	}
+	
+	i = 0; 
+	j = 0; 
+	k = _iEsquerda;
+
+	//marge temp arrays to real array
+	while (i < nl && j<nr) 
+	{
+		if (fncComparaRegistro(larr[i], rarr[j]) == 1) 
+		{
+			_Vetor[k] = larr[i];
+			i++;
+		} else
+		{
+			_Vetor[k] = rarr[j];
+			j++;
+		}
+		k++;
+	}
+
+	while (i < nl) 
+	{       //extra element in left array
+		_Vetor[k] = larr[i];
+		i++; 
+		k++;
+	}
+
+	while (j < nr) {     //extra element in right array
+		_Vetor[k] = rarr[j];
+		j++; 
+		k++;
+	}
 }
 
-void display(PayrollSaoFrancisco *array, int size) {
-   for(int i = 0; i<size; i++)
-      cout << array[i].iID << " ";
-   cout << endl;
-}
-void merge(PayrollSaoFrancisco *array, int l, int m, int r) {
-   int i, j, k, nl, nr;
-   //size of left and right sub-arrays
-   nl = m-l+1; nr = r-m;
-   PayrollSaoFrancisco larr[nl], rarr[nr];
-   //fill left and right sub-arrays
-   for(i = 0; i<nl; i++)
-      larr[i] = array[l+i];
-   for(j = 0; j<nr; j++)
-      rarr[j] = array[m+1+j];
-   i = 0; j = 0; k = l;
-   
-   //marge temp arrays to real array
-   while(i < nl && j<nr) {
-      if(fncComparaRegistro(larr[i], rarr[j]) == 1) {
-         array[k] = larr[i];
-         i++;
-      }else{
-         array[k] = rarr[j];
-         j++;
-      }
-      k++;
-   }
-   
-   while(i<nl) {       //extra element in left array
-      array[k] = larr[i];
-      i++; k++;
-   }
-   
-   while(j<nr) {     //extra element in right array
-      array[k] = rarr[j];
-      j++; k++;
-   }
-}
-
-void mergeSort(PayrollSaoFrancisco *array, int l, int r) {
-   if(l < r) {
-      int m = l+(r-l)/2;
+void mergeSort(PayrollSaoFrancisco *_Vetor, int _iEsquerda, int _iDireita) {
+   if(_iEsquerda < _iDireita) {
+      int iAux = _iEsquerda + (_iDireita - _iEsquerda) / 2;
       // Sort first and second arrays
-      mergeSort(array, l, m);
-      mergeSort(array, m+1, r);
-      merge(array, l, m, r);
+      mergeSort(_Vetor, _iEsquerda, iAux);
+      mergeSort(_Vetor, iAux + 1, _iDireita);
+      merge(_Vetor, _iEsquerda, iAux, _iDireita);
    }
 }
 
@@ -646,6 +650,7 @@ int main()
 			fncInserirNoFinal(TmpRegistro, sNomeArquivoBinario);
 		} else if (iOpcao == 8)
 		{
+			cout << "Ordenando registros..." << endl;
 			pcdOrdenar(sNomeArquivoBinario);
 		} else if (iOpcao == 0)
 		{
