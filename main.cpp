@@ -498,15 +498,12 @@ PayrollSaoFrancisco *fncAlocarVetor(PayrollSaoFrancisco *_vet, int iTamanhoNovo)
 {
 	PayrollSaoFrancisco *novoVetor = new PayrollSaoFrancisco[iTamanhoNovo];
 	
-	cout << "TAM: " << iTamanhoNovo << endl;
 	//memcpy(novoVetor, _vet, (iTamanhoNovo * sizeof(PayrollSaoFrancisco)));
 	for (int i = 0; i < iTamanhoNovo - 1; i++)
 	{
 		novoVetor[i] = _vet[i];
 	}
-	
-	cout << novoVetor[0].cJobTitle << endl;
-	
+		
 	delete[] _vet;
 	return novoVetor;
 } 
@@ -538,9 +535,9 @@ void pcdOrdenar(string _sNomeArquivo)
 			if ((iContRegistros > 9) or ((iPosAtual) >= iTamanhoMaximo))
 			{
 				mergeSort(vet, 0, iContRegistros-1);
-				/*for (int i = 0; i < (iContRegistros); i++)
+				for (int i = 0; i < (iContRegistros); i++)
 				{
-					cout << ((iPosAtual+1)-(iContRegistros))+i << " - RAIZ: " << vet[i].cJobTitle << " : " << vet[i].fOvertimePay << endl;
+					/*cout << ((iPosAtual+1)-(iContRegistros))+i << " - RAIZ: " << vet[i].cJobTitle << " : " << vet[i].fOvertimePay << endl;
 					cout << (iContRegistros) << " - " << i << " -- ";
 					cout << vet[i].iID << ", ";
 					cout << vet[i].cEmployeeName << ", ";
@@ -551,10 +548,10 @@ void pcdOrdenar(string _sNomeArquivo)
 					cout << vet[i].fBenefits << ", ";
 					cout << vet[i].fTotalPay << ", ";
 					cout << vet[i].fTotalPay_Benefits << ", ";  
-					cout << vet[i].iYear << endl;       
+					cout << vet[i].iYear << endl; */      
 					aArquivoBinario.seekp(((((iPosAtual+1)-(iContRegistros))+i) * sizeof(PayrollSaoFrancisco)));
 					aArquivoBinario.write((const char *)(&vet[i]), sizeof(PayrollSaoFrancisco));
-				}*/
+				}
 				iContRegistros = 0;
 				aArquivoBinario.seekg((iPosAtual+1) * sizeof(PayrollSaoFrancisco));
 			}
