@@ -512,6 +512,66 @@ PayrollSaoFrancisco *fncAlocarVetor(PayrollSaoFrancisco *_vet, int iTamanhoNovo)
 	return novoVetor;
 } 
 
+int pcdDividorArquivo(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
+{
+	int iQuantidadeSubArquivos = 0;
+	fstream aArquivoBinario;
+	aArquivoBinario.open(_sNomeArquivoPrincipal, ios::in | ios ::out | ios::binary);
+	if (aArquivoBinario)
+	{
+		int iTamanhoMaximo = 0;
+		int iPosAtual = 0;
+		aArquivoBinario.seekg(0, aArquivoBinario.end);
+		iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
+		aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+		PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[1];
+		int iContRegistros = 0;
+		while (iPosAtual < iTamanhoMaximo)
+		{
+			PayrollSaoFrancisco RegistroComparacao;
+			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
+						
+			vet[iContRegistros] = RegistroComparacao;       
+			iContRegistros++;
+			
+			if ((iContRegistros > 30000) or ((iPosAtual) >= iTamanhoMaximo))
+			{
+				mergeSort(vet, 0, iContRegistros-1);
+				
+				ofstream aSubArquivoBinario;
+				cout << (_sNomeSubArquivos + to_string(iQuantidadeSubArquivos) + ".bin") << endl;
+				aSubArquivoBinario.open((_sNomeSubArquivos + to_string(iQuantidadeSubArquivos) + ".bin"), ios::binary);
+				iQuantidadeSubArquivos++;
+				
+				for (int i = 0; i < (iContRegistros); i++)
+				{
+					aSubArquivoBinario.seekp(((((iPosAtual+1)-(iContRegistros))+i) * sizeof(PayrollSaoFrancisco)));
+					aSubArquivoBinario.write((const char *)(&vet[i]), sizeof(PayrollSaoFrancisco));
+				}
+				
+				aSubArquivoBinario.close();
+				
+				iContRegistros = 0;
+				aArquivoBinario.seekg((iPosAtual+1) * sizeof(PayrollSaoFrancisco));
+			}
+			
+			iPosAtual++;
+			if (((iPosAtual) < iTamanhoMaximo))
+			{
+				vet = fncAlocarVetor(vet, iContRegistros+1);
+			}	
+		}
+	} else
+	{
+		cout << "Erro na leitura do arquivo!";
+	}
+	
+	aArquivoBinario.close();
+	return iQuantidadeSubArquivos;
+}
+
+//void pcdOrdenacaoArquivos(string)
+
 void pcdOrdenar(string _sNomeArquivo)
 {
 	// Primeiro passo é copiar
@@ -536,7 +596,7 @@ void pcdOrdenar(string _sNomeArquivo)
 			vet[iContRegistros] = RegistroComparacao;       
 			iContRegistros++;
 			
-			if ((iContRegistros > 9) or ((iPosAtual) >= iTamanhoMaximo))
+			if ((iContRegistros > 29) or ((iPosAtual) >= iTamanhoMaximo))
 			{
 				mergeSort(vet, 0, iContRegistros-1);
 				for (int i = 0; i < (iContRegistros); i++)
@@ -573,6 +633,8 @@ void pcdOrdenar(string _sNomeArquivo)
 	
 	aArquivoBinario.close();
 }
+
+
 
 int main()
 {
@@ -652,6 +714,10 @@ int main()
 		{
 			cout << "Ordenando registros..." << endl;
 			pcdOrdenar(sNomeArquivoBinario);
+		} else if (iOpcao == 9)
+		{
+			cout << "Dividindo arquivo..." << endl;
+			pcdDividorArquivo(sNomeArquivoBinario, "subArquivo");
 		} else if (iOpcao == 0)
 		{
 			cout << "Saindo..." << endl;
