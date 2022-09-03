@@ -76,6 +76,30 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 				(TRegistro.cEmployeeName)[iTamanho] = '\0';				
 				
 				getline(aArquivoEntrada, sValorCampo, ','); 
+				
+				/**if (sValorCampo[0] == '"')
+				{
+					//cout << sValorCampo << ","; 
+					iTamanho = sValorCampo.size();
+					for (int i = 0; i < iTamanho; i++)
+					{
+						(TRegistro.cJobTitle)[i] = (sValorCampo)[i];
+					} 
+					
+					getline(aArquivoEntrada, sValorCampo, '"'); 
+					
+					int iOutroTamanho = sValorCampo.size();
+					
+					for (int i = 0; i < iOutroTamanho; i++)
+					{
+						(TRegistro.cJobTitle)[i] = (sValorCampo)[i];
+					} 
+					
+					getline(aArquivoEntrada, sValorCampo, ',');
+					
+					(TRegistro.cJobTitle)[(iTamanho + iOutroTamanho)] = '\0';
+				} else
+				{*/
 				//cout << sValorCampo << ","; 
 				iTamanho = sValorCampo.size();
 				for (int i = 0; i < iTamanho; i++)
@@ -84,6 +108,7 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 				} 
 				
 				(TRegistro.cJobTitle)[iTamanho] = '\0';
+				//}
 				
 				getline(aArquivoEntrada, sValorCampo, ',');  
 				//cout << sValorCampo << ",";
@@ -326,7 +351,7 @@ void fncInserirNoFinal(PayrollSaoFrancisco _TMPREGISTRO, string _sNomeArquivo)
 
 // Função para trocar registros de posição
 void fncTrocarPosicao(int _iPrimeiraPosicao, int _iSegundaPosicao, string _sNomeArquivo)
-{	
+{
 	PayrollSaoFrancisco PrimeiroRegistro, SegundoRegistro;
 	
 	fstream aArquivoBinario;
@@ -512,7 +537,7 @@ PayrollSaoFrancisco *fncAlocarVetor(PayrollSaoFrancisco *_vet, int iTamanhoNovo)
 	return novoVetor;
 } 
 
-int pcdDividorArquivo(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
+int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
 {
 	int iQuantidadeSubArquivos = 0;
 	fstream aArquivoBinario;
@@ -524,42 +549,47 @@ int pcdDividorArquivo(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
 		aArquivoBinario.seekg(0, aArquivoBinario.end);
 		iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
 		aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
-		PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[1];
-		int iContRegistros = 0;
+		int iQuantidadeRegistros = 3500;
 		while (iPosAtual < iTamanhoMaximo)
 		{
-			PayrollSaoFrancisco RegistroComparacao;
-			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
-						
-			vet[iContRegistros] = RegistroComparacao;       
-			iContRegistros++;
+			PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[iQuantidadeRegistros];
+			aArquivoBinario.read(reinterpret_cast<char*>(vet), sizeof(PayrollSaoFrancisco) * iQuantidadeRegistros);	
 			
-			if ((iContRegistros > 30000) or ((iPosAtual) >= iTamanhoMaximo))
+			//cout << "ANTES DO MERGE: " << vet[0].cJobTitle << endl;
+			
+			mergeSort(vet, 0, iQuantidadeRegistros-1);
+			
+			//cout << "DEPOIS DO MERGE: " << vet[0].cJobTitle << endl;
+				
+			ofstream aSubArquivoBinario;
+			aSubArquivoBinario.open(("subarquivos/" + _sNomeSubArquivos + to_string(iQuantidadeSubArquivos) + ".bin"), ios::binary);
+			
+			if (aSubArquivoBinario.fail())
 			{
-				mergeSort(vet, 0, iContRegistros-1);
-				
-				ofstream aSubArquivoBinario;
-				cout << (_sNomeSubArquivos + to_string(iQuantidadeSubArquivos) + ".bin") << endl;
-				aSubArquivoBinario.open((_sNomeSubArquivos + to_string(iQuantidadeSubArquivos) + ".bin"), ios::binary);
-				iQuantidadeSubArquivos++;
-				
-				for (int i = 0; i < (iContRegistros); i++)
-				{
-					aSubArquivoBinario.seekp(((((iPosAtual+1)-(iContRegistros))+i) * sizeof(PayrollSaoFrancisco)));
-					aSubArquivoBinario.write((const char *)(&vet[i]), sizeof(PayrollSaoFrancisco));
-				}
-				
-				aSubArquivoBinario.close();
-				
-				iContRegistros = 0;
-				aArquivoBinario.seekg((iPosAtual+1) * sizeof(PayrollSaoFrancisco));
+				cout << "Falhou ao criar arquivo" << endl;
 			}
+
 			
-			iPosAtual++;
-			if (((iPosAtual) < iTamanhoMaximo))
-			{
-				vet = fncAlocarVetor(vet, iContRegistros+1);
-			}	
+			iQuantidadeSubArquivos++;
+				
+			aSubArquivoBinario.seekp(0);
+			aSubArquivoBinario.write(reinterpret_cast<const char *>(&vet[0]), sizeof(PayrollSaoFrancisco) * (iQuantidadeRegistros-1));
+							
+			aSubArquivoBinario.close();
+			
+			/*
+			 * Debug
+			fstream aSubArquivoBinario2;
+			aSubArquivoBinario2.open(("subarquivos/" + _sNomeSubArquivos + to_string(iQuantidadeSubArquivos) + ".bin"), ios::in | ios ::out | ios::binary);
+			PayrollSaoFrancisco teste;
+			aSubArquivoBinario2.seekg(0, aSubArquivoBinario2.beg);
+			aSubArquivoBinario2.read(reinterpret_cast<char*>(&teste), sizeof(PayrollSaoFrancisco));
+			cout << "Primeiro Registro do arquivo: " << teste.cJobTitle << endl;
+			aSubArquivoBinario2.close();*/
+			
+			iPosAtual += iQuantidadeRegistros;
+			aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+			delete[] vet;
 		}
 	} else
 	{
@@ -567,10 +597,115 @@ int pcdDividorArquivo(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
 	}
 	
 	aArquivoBinario.close();
-	return iQuantidadeSubArquivos;
+	return iQuantidadeSubArquivos+1;
 }
 
-//void pcdOrdenacaoArquivos(string)
+void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
+{
+	fstream aArquivoBinario;
+	aArquivoBinario.open(_sNomeArquivoPrincipal, ios::in | ios ::out | ios::binary);
+	int iTamanhoMaximo = 0;
+	int iPosAtual = 0;
+	string sNomeArquivoMenorRegistro;
+	aArquivoBinario.seekg(0, aArquivoBinario.end);
+	iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
+	aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+	
+	int iQuantidadeRegistrosInseridos = 0;
+	int iQuantidadeSubArquivos = pcdDividirArquivoCompacto(_sNomeArquivoPrincipal, _sNomeSubArquivos);
+	
+	aArquivoBinario.seekp(0);
+	
+	cout << "QTD ESPERADA DE DADOS: " << iTamanhoMaximo << endl;
+	
+	bool bSetouPrimeiro = false;
+	
+	while (iQuantidadeRegistrosInseridos < iTamanhoMaximo)
+	{
+		
+		//RegistroComparacao.iID = -1;
+		PayrollSaoFrancisco rgMenorRegistro;
+		//cout << "QTD INSERIDOS: " << iQuantidadeRegistrosInseridos << endl;
+		for (int i = 0; i < iQuantidadeSubArquivos; i++)
+		{
+			cout << "Abrindo o arquivo: " << ("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin") << endl;
+			PayrollSaoFrancisco RegistroComparacao;
+			ifstream aSubArquivoBinario;
+			aSubArquivoBinario.open(("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin"), ios ::out | ios::binary);
+			aSubArquivoBinario.seekg(0, aSubArquivoBinario.beg);
+			
+			aSubArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
+			
+			if (RegistroComparacao.cEmployeeName[0] != '\0')
+			{
+				if (!bSetouPrimeiro)
+				{
+					rgMenorRegistro = RegistroComparacao;
+					bSetouPrimeiro = true;
+				} else
+				{
+					if (fncComparaRegistro((RegistroComparacao), (rgMenorRegistro)) == 1)
+					{
+						cout << i << " - MENOR ANTERIOR: " <<  (rgMenorRegistro).cJobTitle << " - NOVO MENOR: " << (RegistroComparacao).cJobTitle << endl;
+						sNomeArquivoMenorRegistro = ("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin");
+						rgMenorRegistro = RegistroComparacao;
+					}
+				}
+			}
+			
+			aSubArquivoBinario.close();
+		}
+						
+		if (sNomeArquivoMenorRegistro != "")
+		{
+			cout << "NOME MENOR: " << rgMenorRegistro.cJobTitle << endl;
+			aArquivoBinario.write((const char *)(&rgMenorRegistro), sizeof(PayrollSaoFrancisco));
+			
+			//cout << "ESCREVEU NO PRINCIPAL" << endl;
+			fstream aSubArquivoBinario;
+			aSubArquivoBinario.open(sNomeArquivoMenorRegistro, ios::in | ios ::out | ios::binary);
+			aSubArquivoBinario.seekg(0, aSubArquivoBinario.end);
+			int iQtdDados = aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
+			
+			PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[iQtdDados];
+			aSubArquivoBinario.read(reinterpret_cast<char*>(&vet), sizeof(PayrollSaoFrancisco) * iQtdDados);
+			
+			for (int i = 0; i < 10; i++)
+			{
+				cout << "--" << vet[i].cEmployeeName << endl;
+			}			
+			
+			break;
+						
+						
+			cout << "TIRANDO PRIMEIRA POS" << endl;
+			cout << vet[0].cEmployeeName << endl;
+		
+			
+			cout << vet[0].cEmployeeName << endl;
+			
+			//cout << "ESCREVENDO NO ARQUIVO" << endl;
+			aSubArquivoBinario.seekp(0);
+			aSubArquivoBinario.write((const char *)(&vet[0]), sizeof(PayrollSaoFrancisco) * (iQtdDados-1));
+			
+			delete[] vet;
+			aSubArquivoBinario.close();
+			sNomeArquivoMenorRegistro = "";
+
+			iQuantidadeRegistrosInseridos++;
+			
+			if ((iQuantidadeRegistrosInseridos % 50000) == 0)
+				cout << "QTD INSERIDOS: " << iQuantidadeRegistrosInseridos << endl;
+			
+			bSetouPrimeiro = false;
+			
+			
+		}
+		//cout << "-----------------------------------------" << endl;
+	}
+	aArquivoBinario.close();
+	cout << "QTD INSERIDOS: " << iQuantidadeRegistrosInseridos << endl;
+}
 
 void pcdOrdenar(string _sNomeArquivo)
 {
@@ -596,7 +731,7 @@ void pcdOrdenar(string _sNomeArquivo)
 			vet[iContRegistros] = RegistroComparacao;       
 			iContRegistros++;
 			
-			if ((iContRegistros > 29) or ((iPosAtual) >= iTamanhoMaximo))
+			if ((iContRegistros > 3000) or ((iPosAtual) >= iTamanhoMaximo))
 			{
 				mergeSort(vet, 0, iContRegistros-1);
 				for (int i = 0; i < (iContRegistros); i++)
@@ -668,7 +803,11 @@ int main()
 		} else if (iOpcao == 2)
 		{
 			cout << "Imprimindo registros..." << endl;
-			fncImprimirArquivoBinario(sNomeArquivoBinario, -1, -1);
+			string sNomeArquivo;
+			cin >> sNomeArquivo;
+			if (sNomeArquivo == "*")
+				sNomeArquivo = sNomeArquivoBinario;
+			fncImprimirArquivoBinario(sNomeArquivo, -1, -1);
 		} else if (iOpcao == 3)
 		{
 			int iPosicaoInicial, iPosicaoFinal;
@@ -713,11 +852,11 @@ int main()
 		} else if (iOpcao == 8)
 		{
 			cout << "Ordenando registros..." << endl;
-			pcdOrdenar(sNomeArquivoBinario);
+			pcdOrdenacaoArquivos(sNomeArquivoBinario, "subArquivo");
 		} else if (iOpcao == 9)
 		{
 			cout << "Dividindo arquivo..." << endl;
-			pcdDividorArquivo(sNomeArquivoBinario, "subArquivo");
+			pcdDividirArquivoCompacto(sNomeArquivoBinario, "subArquivo");
 		} else if (iOpcao == 0)
 		{
 			cout << "Saindo..." << endl;
