@@ -658,15 +658,21 @@ void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivo
 	int iQuantidadeRegistrosInseridos = 0;
 	int iQuantidadeSubArquivos = pcdDividirArquivoCompacto(_sNomeArquivoPrincipal, _sNomeSubArquivos);
 	
+	remove(_sNomeArquivoPrincipal.c_str());
 	
+	ofstream aCreateArquivoBinario;
+	aCreateArquivoBinario.open((_sNomeArquivoPrincipal), ios::binary);
+	aCreateArquivoBinario.close();
+	
+	int iQuantidadeArquivosSemRegistros = 0;
 	
 	cout << "QTD ESPERADA DE DADOS: " << iTamanhoMaximo << endl;
 	
 	bool bSetouPrimeiro = false;
 	
-	while (iQuantidadeRegistrosInseridos < iTamanhoMaximo)
+	while ((iQuantidadeRegistrosInseridos < iTamanhoMaximo) and (iQuantidadeArquivosSemRegistros <= iQuantidadeSubArquivos))
 	{
-		
+		iQuantidadeArquivosSemRegistros = 0;
 		PayrollSaoFrancisco rgMenorRegistro;
 		for (int i = 0; i < iQuantidadeSubArquivos; i++)
 		{
@@ -696,14 +702,13 @@ void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivo
 						}
 					}
 				}
-			} /*else
+			} else
 			{
-				if (!(aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco)) >= sizeof(PayrollSaoFrancisco))
+				if (!((aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco)) >= sizeof(PayrollSaoFrancisco)))
 				{
-					aSubArquivoBinario.close();
-					remove(sNomeArquivo);
+					iQuantidadeArquivosSemRegistros++;
 				}
-			}*/
+			}
 			
 			aSubArquivoBinario.close();
 		}
@@ -712,7 +717,7 @@ void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivo
 		{
 			fstream aArquivoBinario;
 			aArquivoBinario.open((_sNomeArquivoPrincipal), ios::in | ios ::out | ios::binary);
-			aArquivoBinario.seekp(aArquivoBinario.end);
+			aArquivoBinario.seekp(0, aArquivoBinario.end);
 			
 			aArquivoBinario.write((const char *)(&rgMenorRegistro), sizeof(PayrollSaoFrancisco));
 			aArquivoBinario.close();
@@ -720,7 +725,7 @@ void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivo
 			pcdRetirarPrimeiraPosicao(sNomeArquivoMenorRegistro);
 			
 			sNomeArquivoMenorRegistro = "";
-
+			
 			iQuantidadeRegistrosInseridos++;
 			
 			if ((iQuantidadeRegistrosInseridos % 1000) == 0)
