@@ -438,18 +438,32 @@ int fncComparaRegistro(PayrollSaoFrancisco _TMPREGISTRO1, PayrollSaoFrancisco _T
 {
 	// Primeiro compara cJobTitle.
 	//cout << _TMPREGISTRO1.cJobTitle << " - " << _TMPREGISTRO2.cJobTitle << endl;
-	int iComparacao = strcmp(_TMPREGISTRO1.cJobTitle, _TMPREGISTRO2.cJobTitle);
-	if (iComparacao < 0)
+	if (_TMPREGISTRO1.cJobTitle != _TMPREGISTRO2.cJobTitle)
 	{
-		//cout << _TMPREGISTRO1.cJobTitle << endl;
-		return 1;
-	} else if (iComparacao > 0)
-	{
-		//cout << _TMPREGISTRO2.cJobTitle << endl;
-		return 2;
+		int iComparacao = strcmp(_TMPREGISTRO1.cJobTitle, _TMPREGISTRO2.cJobTitle);
+		if (iComparacao < 0)
+		{
+			//cout << _TMPREGISTRO1.cJobTitle << endl;
+			return 1;
+		} else if (iComparacao > 0)
+		{
+			//cout << _TMPREGISTRO2.cJobTitle << endl;
+			return 2;
+		} else
+		{
+			// Caso não for nem maior, nem menor, ou seja, é igual, então compara-se o ID.
+			if (_TMPREGISTRO1.iID < _TMPREGISTRO2.iID)
+			{
+				//cout << _TMPREGISTRO1.cJobTitle << endl;
+				return 1;
+			} else
+			{
+				//cout << _TMPREGISTRO2.cJobTitle << endl;
+				return 2;
+			}
+		}
 	} else
 	{
-		// Caso não for nem maior, nem menor, ou seja, é igual, então compara-se o ID.
 		if (_TMPREGISTRO1.iID < _TMPREGISTRO2.iID)
 		{
 			//cout << _TMPREGISTRO1.cJobTitle << endl;
@@ -535,7 +549,7 @@ PayrollSaoFrancisco *fncAlocarVetor(PayrollSaoFrancisco *_vet, int iTamanhoNovo)
 		
 	delete[] _vet;
 	return novoVetor;
-} 
+}
 
 int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
 {
@@ -552,6 +566,10 @@ int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArq
 		int iQuantidadeRegistros = 3500;
 		while (iPosAtual < iTamanhoMaximo)
 		{
+			
+			if ((iTamanhoMaximo - iPosAtual) < 3500)
+				iQuantidadeRegistros = (iTamanhoMaximo - iPosAtual);
+			
 			PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[iQuantidadeRegistros];
 			aArquivoBinario.read(reinterpret_cast<char*>(vet), sizeof(PayrollSaoFrancisco) * iQuantidadeRegistros);	
 			
@@ -568,7 +586,6 @@ int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArq
 			{
 				cout << "Falhou ao criar arquivo" << endl;
 			}
-
 			
 			iQuantidadeSubArquivos++;
 				
@@ -600,21 +617,48 @@ int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArq
 	return iQuantidadeSubArquivos+1;
 }
 
+void pcdRetirarPrimeiraPosicao(string _sNomeArquivo)
+{
+	//cout << "ESCREVEU NO PRINCIPAL" << endl;
+	fstream aSubArquivoBinario;
+	aSubArquivoBinario.open(_sNomeArquivo, ios::in | ios ::out | ios::binary);
+	aSubArquivoBinario.seekg(0, aSubArquivoBinario.end);
+	int iQtdDados = aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
+	
+	aSubArquivoBinario.seekg(0, aSubArquivoBinario.beg);
+	PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[iQtdDados];
+	aSubArquivoBinario.read(reinterpret_cast<char*>(vet), sizeof(PayrollSaoFrancisco) * iQtdDados);						
+				
+	aSubArquivoBinario.close();	
+	
+	remove(_sNomeArquivo.c_str());
+	
+	ofstream aSubArquivoBinario2;
+	aSubArquivoBinario2.open(_sNomeArquivo, ios::binary);
+	aSubArquivoBinario2.seekp(0);
+	aSubArquivoBinario2.write((const char *)(&vet[1]), sizeof(PayrollSaoFrancisco) * (iQtdDados-1));
+	
+	delete[] vet;
+	aSubArquivoBinario2.close();
+}
+
 void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
 {
 	fstream aArquivoBinario;
 	aArquivoBinario.open(_sNomeArquivoPrincipal, ios::in | ios ::out | ios::binary);
+	
 	int iTamanhoMaximo = 0;
 	int iPosAtual = 0;
 	string sNomeArquivoMenorRegistro;
 	aArquivoBinario.seekg(0, aArquivoBinario.end);
 	iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
 	aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+	aArquivoBinario.close();
 	
 	int iQuantidadeRegistrosInseridos = 0;
 	int iQuantidadeSubArquivos = pcdDividirArquivoCompacto(_sNomeArquivoPrincipal, _sNomeSubArquivos);
 	
-	aArquivoBinario.seekp(0);
+	
 	
 	cout << "QTD ESPERADA DE DADOS: " << iTamanhoMaximo << endl;
 	
@@ -623,85 +667,67 @@ void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivo
 	while (iQuantidadeRegistrosInseridos < iTamanhoMaximo)
 	{
 		
-		//RegistroComparacao.iID = -1;
 		PayrollSaoFrancisco rgMenorRegistro;
-		//cout << "QTD INSERIDOS: " << iQuantidadeRegistrosInseridos << endl;
 		for (int i = 0; i < iQuantidadeSubArquivos; i++)
 		{
-			cout << "Abrindo o arquivo: " << ("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin") << endl;
 			PayrollSaoFrancisco RegistroComparacao;
 			ifstream aSubArquivoBinario;
-			aSubArquivoBinario.open(("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin"), ios ::out | ios::binary);
-			aSubArquivoBinario.seekg(0, aSubArquivoBinario.beg);
-			
-			aSubArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
-			
-			if (RegistroComparacao.cEmployeeName[0] != '\0')
+			string sNomeArquivo = ("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin");
+			aSubArquivoBinario.open(sNomeArquivo, ios ::out | ios::binary);
+			aSubArquivoBinario.seekg(0, aSubArquivoBinario.end);
+			if ((aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco)) >= sizeof(PayrollSaoFrancisco) and (("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin") != sNomeArquivoMenorRegistro))
 			{
-				if (!bSetouPrimeiro)
+				aSubArquivoBinario.seekg(0, aSubArquivoBinario.beg);
+				aSubArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
+			
+				if (RegistroComparacao.cJobTitle[0] != '\0')
 				{
-					rgMenorRegistro = RegistroComparacao;
-					bSetouPrimeiro = true;
-				} else
-				{
-					if (fncComparaRegistro((RegistroComparacao), (rgMenorRegistro)) == 1)
+					if (!bSetouPrimeiro)
 					{
-						cout << i << " - MENOR ANTERIOR: " <<  (rgMenorRegistro).cJobTitle << " - NOVO MENOR: " << (RegistroComparacao).cJobTitle << endl;
-						sNomeArquivoMenorRegistro = ("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin");
 						rgMenorRegistro = RegistroComparacao;
+						sNomeArquivoMenorRegistro = sNomeArquivo;
+						bSetouPrimeiro = true;
+					} else
+					{
+						if (fncComparaRegistro((RegistroComparacao), (rgMenorRegistro)) == 1)
+						{
+							sNomeArquivoMenorRegistro = sNomeArquivo;
+							rgMenorRegistro = RegistroComparacao;
+						}
 					}
 				}
-			}
+			} /*else
+			{
+				if (!(aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco)) >= sizeof(PayrollSaoFrancisco))
+				{
+					aSubArquivoBinario.close();
+					remove(sNomeArquivo);
+				}
+			}*/
 			
 			aSubArquivoBinario.close();
 		}
 						
 		if (sNomeArquivoMenorRegistro != "")
 		{
-			cout << "NOME MENOR: " << rgMenorRegistro.cJobTitle << endl;
+			fstream aArquivoBinario;
+			aArquivoBinario.open((_sNomeArquivoPrincipal), ios::in | ios ::out | ios::binary);
+			aArquivoBinario.seekp(aArquivoBinario.end);
+			
 			aArquivoBinario.write((const char *)(&rgMenorRegistro), sizeof(PayrollSaoFrancisco));
+			aArquivoBinario.close();
 			
-			//cout << "ESCREVEU NO PRINCIPAL" << endl;
-			fstream aSubArquivoBinario;
-			aSubArquivoBinario.open(sNomeArquivoMenorRegistro, ios::in | ios ::out | ios::binary);
-			aSubArquivoBinario.seekg(0, aSubArquivoBinario.end);
-			int iQtdDados = aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
+			pcdRetirarPrimeiraPosicao(sNomeArquivoMenorRegistro);
 			
-			PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[iQtdDados];
-			aSubArquivoBinario.read(reinterpret_cast<char*>(&vet), sizeof(PayrollSaoFrancisco) * iQtdDados);
-			
-			for (int i = 0; i < 10; i++)
-			{
-				cout << "--" << vet[i].cEmployeeName << endl;
-			}			
-			
-			break;
-						
-						
-			cout << "TIRANDO PRIMEIRA POS" << endl;
-			cout << vet[0].cEmployeeName << endl;
-		
-			
-			cout << vet[0].cEmployeeName << endl;
-			
-			//cout << "ESCREVENDO NO ARQUIVO" << endl;
-			aSubArquivoBinario.seekp(0);
-			aSubArquivoBinario.write((const char *)(&vet[0]), sizeof(PayrollSaoFrancisco) * (iQtdDados-1));
-			
-			delete[] vet;
-			aSubArquivoBinario.close();
 			sNomeArquivoMenorRegistro = "";
 
 			iQuantidadeRegistrosInseridos++;
 			
-			if ((iQuantidadeRegistrosInseridos % 50000) == 0)
+			if ((iQuantidadeRegistrosInseridos % 1000) == 0)
 				cout << "QTD INSERIDOS: " << iQuantidadeRegistrosInseridos << endl;
 			
 			bSetouPrimeiro = false;
-			
-			
 		}
-		//cout << "-----------------------------------------" << endl;
 	}
 	aArquivoBinario.close();
 	cout << "QTD INSERIDOS: " << iQuantidadeRegistrosInseridos << endl;
