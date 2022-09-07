@@ -476,81 +476,136 @@ int fncComparaRegistro(PayrollSaoFrancisco _TMPREGISTRO1, PayrollSaoFrancisco _T
 	}
 }
 
+// Função para fazer merge em vetor de PayrollSaoFrancisco
 void merge(PayrollSaoFrancisco *_Vetor, int _iEsquerda, int m, int _iDireita) {
-	int i, j, k, nl, nr;
-	//size of left and right sub-arrays
-	nl = m - _iEsquerda + 1; 
-	nr = _iDireita - m;
-	PayrollSaoFrancisco larr[nl];
-	PayrollSaoFrancisco rarr[nr];
+	int i, j, k, iEsquerda, iDireita;
 	
-	//fill left and right sub-arrays
-	for(i = 0; i<nl; i++)
+	iEsquerda = m - _iEsquerda + 1; 
+	iDireita = _iDireita - m;
+	PayrollSaoFrancisco ArrayEsquerda[iEsquerda];
+	PayrollSaoFrancisco ArrayDireita[iDireita];
+	
+	for(i = 0; i<iEsquerda; i++)
 	{
-      larr[i] = _Vetor[_iEsquerda + i];
+      ArrayEsquerda[i] = _Vetor[_iEsquerda + i];
 	}
-	for (j = 0; j<nr; j++)
+	for (j = 0; j<iDireita; j++)
 	{
-		rarr[j] = _Vetor[m + 1 + j];
+		ArrayDireita[j] = _Vetor[m + 1 + j];
 	}
 	
 	i = 0; 
 	j = 0; 
 	k = _iEsquerda;
 
-	//marge temp arrays to real array
-	while (i < nl && j<nr) 
+	while (i < iEsquerda && j<iDireita) 
 	{
-		if (fncComparaRegistro(larr[i], rarr[j]) == 1) 
+		if (fncComparaRegistro(ArrayEsquerda[i], ArrayDireita[j]) == 1) 
 		{
-			_Vetor[k] = larr[i];
+			_Vetor[k] = ArrayEsquerda[i];
 			i++;
 		} else
 		{
-			_Vetor[k] = rarr[j];
+			_Vetor[k] = ArrayDireita[j];
 			j++;
 		}
 		k++;
 	}
 
-	while (i < nl) 
-	{       //extra element in left array
-		_Vetor[k] = larr[i];
+	while (i < iEsquerda) 
+	{  
+		_Vetor[k] = ArrayEsquerda[i];
 		i++; 
 		k++;
 	}
 
-	while (j < nr) {     //extra element in right array
-		_Vetor[k] = rarr[j];
+	while (j < iDireita) {
+		_Vetor[k] = ArrayDireita[j];
 		j++; 
 		k++;
 	}
 }
 
+// Função MergeSort
 void mergeSort(PayrollSaoFrancisco *_Vetor, int _iEsquerda, int _iDireita) {
    if(_iEsquerda < _iDireita) {
       int iAux = _iEsquerda + (_iDireita - _iEsquerda) / 2;
-      // Sort first and second arrays
       mergeSort(_Vetor, _iEsquerda, iAux);
       mergeSort(_Vetor, iAux + 1, _iDireita);
       merge(_Vetor, _iEsquerda, iAux, _iDireita);
    }
 }
 
-PayrollSaoFrancisco *fncAlocarVetor(PayrollSaoFrancisco *_vet, int iTamanhoNovo)
+// Struct auxiliar para organização de subarquivos.
+struct SubArquivos
 {
-	PayrollSaoFrancisco *novoVetor = new PayrollSaoFrancisco[iTamanhoNovo];
+	PayrollSaoFrancisco dado;
+	string sNomeArquivo;
+	int iQuantidadeRegistros;
+};
+
+// Merge no Vetor de SubArquivos.
+void mergeSubArquivos(SubArquivos *_Vetor, int _iEsquerda, int m, int _iDireita) {
+	int i, j, k, iEsquerda, iDireita;
+
+	iEsquerda = m - _iEsquerda + 1; 
+	iDireita = _iDireita - m;
+	SubArquivos ArrayEsquerda[iEsquerda];
+	SubArquivos ArrayDireita[iDireita];
 	
-	//memcpy(novoVetor, _vet, (iTamanhoNovo * sizeof(PayrollSaoFrancisco)));
-	for (int i = 0; i < iTamanhoNovo - 1; i++)
+	for(i = 0; i<iEsquerda; i++)
 	{
-		novoVetor[i] = _vet[i];
+      ArrayEsquerda[i] = _Vetor[_iEsquerda + i];
 	}
-		
-	delete[] _vet;
-	return novoVetor;
+	for (j = 0; j<iDireita; j++)
+	{
+		ArrayDireita[j] = _Vetor[m + 1 + j];
+	}
+	
+	i = 0; 
+	j = 0; 
+	k = _iEsquerda;
+
+	while (i < iEsquerda && j<iDireita) 
+	{
+		if (fncComparaRegistro(ArrayEsquerda[i].dado, ArrayDireita[j].dado) == 1) 
+		{
+			_Vetor[k] = ArrayEsquerda[i];
+			i++;
+		} else
+		{
+			_Vetor[k] = ArrayDireita[j];
+			j++;
+		}
+		k++;
+	}
+
+	while (i < iEsquerda) 
+	{     
+		_Vetor[k] = ArrayEsquerda[i];
+		i++; 
+		k++;
+	}
+
+	while (j < iDireita) { 
+		_Vetor[k] = ArrayDireita[j];
+		j++; 
+		k++;
+	}
 }
 
+// Função MergeSort de subarquivos
+void mergeSortSubArquivos(SubArquivos *_Vetor, int _iEsquerda, int _iDireita) {
+   if(_iEsquerda < _iDireita) {
+      int iAux = _iEsquerda + (_iDireita - _iEsquerda) / 2;
+      // Sort first and second arrays
+      mergeSortSubArquivos(_Vetor, _iEsquerda, iAux);
+      mergeSortSubArquivos(_Vetor, iAux + 1, _iDireita);
+      mergeSubArquivos(_Vetor, _iEsquerda, iAux, _iDireita);
+   }
+}
+
+// Função para dividir o arquivo principal em subarquivos.
 int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
 {
 	int iQuantidadeSubArquivos = 0;
@@ -563,21 +618,20 @@ int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArq
 		aArquivoBinario.seekg(0, aArquivoBinario.end);
 		iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
 		aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
+		// A quantidade escolhida de registros máximos por subarquivo é 3500
 		int iQuantidadeRegistros = 3500;
 		while (iPosAtual < iTamanhoMaximo)
 		{
 			
+			// caso a quantidade de registros restantes for menor que 3500, insere um ultimo pacote com essa quantidade.
 			if ((iTamanhoMaximo - iPosAtual) < 3500)
 				iQuantidadeRegistros = (iTamanhoMaximo - iPosAtual);
 			
 			PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[iQuantidadeRegistros];
 			aArquivoBinario.read(reinterpret_cast<char*>(vet), sizeof(PayrollSaoFrancisco) * iQuantidadeRegistros);	
 			
-			//cout << "ANTES DO MERGE: " << vet[0].cJobTitle << endl;
-			
+			// Faz um MergeSort para inserir no SubArquivo ordenado.
 			mergeSort(vet, 0, iQuantidadeRegistros-1);
-			
-			//cout << "DEPOIS DO MERGE: " << vet[0].cJobTitle << endl;
 				
 			ofstream aSubArquivoBinario;
 			aSubArquivoBinario.open(("subarquivos/" + _sNomeSubArquivos + to_string(iQuantidadeSubArquivos) + ".bin"), ios::binary);
@@ -588,21 +642,12 @@ int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArq
 			}
 			
 			iQuantidadeSubArquivos++;
-				
+			
+			// Escrever vetor no subarquivo.
 			aSubArquivoBinario.seekp(0);
 			aSubArquivoBinario.write(reinterpret_cast<const char *>(&vet[0]), sizeof(PayrollSaoFrancisco) * (iQuantidadeRegistros-1));
 							
 			aSubArquivoBinario.close();
-			
-			/*
-			 * Debug
-			fstream aSubArquivoBinario2;
-			aSubArquivoBinario2.open(("subarquivos/" + _sNomeSubArquivos + to_string(iQuantidadeSubArquivos) + ".bin"), ios::in | ios ::out | ios::binary);
-			PayrollSaoFrancisco teste;
-			aSubArquivoBinario2.seekg(0, aSubArquivoBinario2.beg);
-			aSubArquivoBinario2.read(reinterpret_cast<char*>(&teste), sizeof(PayrollSaoFrancisco));
-			cout << "Primeiro Registro do arquivo: " << teste.cJobTitle << endl;
-			aSubArquivoBinario2.close();*/
 			
 			iPosAtual += iQuantidadeRegistros;
 			aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
@@ -617,9 +662,10 @@ int pcdDividirArquivoCompacto(string _sNomeArquivoPrincipal, string _sNomeSubArq
 	return iQuantidadeSubArquivos+1;
 }
 
+// Função para remover o primeiro registro do arquivo escolhido.
 void pcdRetirarPrimeiraPosicao(string _sNomeArquivo)
 {
-	//cout << "ESCREVEU NO PRINCIPAL" << endl;
+	// Abrindo o arquivo primeiramente para verificar a quantidade de registros.
 	fstream aSubArquivoBinario;
 	aSubArquivoBinario.open(_sNomeArquivo, ios::in | ios ::out | ios::binary);
 	aSubArquivoBinario.seekg(0, aSubArquivoBinario.end);
@@ -631,6 +677,7 @@ void pcdRetirarPrimeiraPosicao(string _sNomeArquivo)
 				
 	aSubArquivoBinario.close();	
 	
+	// Remove o arquivo inteiro para criar novamente, inserindo após a segunda posição do vetor lido, para não precisar percorre-lo inteiro.
 	remove(_sNomeArquivo.c_str());
 	
 	ofstream aSubArquivoBinario2;
@@ -642,8 +689,9 @@ void pcdRetirarPrimeiraPosicao(string _sNomeArquivo)
 	aSubArquivoBinario2.close();
 }
 
-void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
+void pcdOrdenacaoArquivos2(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
 {
+	// Abrir o arquivo para pegar tamanho máximo
 	fstream aArquivoBinario;
 	aArquivoBinario.open(_sNomeArquivoPrincipal, ios::in | ios ::out | ios::binary);
 	
@@ -656,151 +704,146 @@ void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivo
 	aArquivoBinario.close();
 	
 	int iQuantidadeRegistrosInseridos = 0;
+		
+	// Dividir o arquivo principal em sub-arquivos ordenados
 	int iQuantidadeSubArquivos = pcdDividirArquivoCompacto(_sNomeArquivoPrincipal, _sNomeSubArquivos);
 	
+	// Remover o arquivo principal para liberar o espaço inicial
 	remove(_sNomeArquivoPrincipal.c_str());
 	
+	// Criar o arquivo principal para inserção dos registros.
 	ofstream aCreateArquivoBinario;
 	aCreateArquivoBinario.open((_sNomeArquivoPrincipal), ios::binary);
 	aCreateArquivoBinario.close();
 	
-	int iQuantidadeArquivosSemRegistros = 0;
+	//cout << "QTD ESPERADA DE DADOS: " << iTamanhoMaximo << endl;
+		
+	// Criado novo vetor da nova Struct que contem o Primeiro registro de cada arquivo, a quantidade de registros e o nome desse arquivo.
+	SubArquivos *VetorPrimeiroRegistro = new SubArquivos[iQuantidadeSubArquivos];
 	
-	cout << "QTD ESPERADA DE DADOS: " << iTamanhoMaximo << endl;
-	
-	bool bSetouPrimeiro = false;
-	
-	while ((iQuantidadeRegistrosInseridos < iTamanhoMaximo) and (iQuantidadeArquivosSemRegistros <= iQuantidadeSubArquivos))
+	// Preencher as posições do vetor de subarquivo.
+	for (int i = 0; i < iQuantidadeSubArquivos; i++)
 	{
-		iQuantidadeArquivosSemRegistros = 0;
-		PayrollSaoFrancisco rgMenorRegistro;
-		for (int i = 0; i < iQuantidadeSubArquivos; i++)
+		PayrollSaoFrancisco RegistroComparacao;
+		ifstream aSubArquivoBinario;
+		string sNomeArquivo = ("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin");
+		aSubArquivoBinario.open(sNomeArquivo, ios ::out | ios::binary);
+		aSubArquivoBinario.seekg(0, aSubArquivoBinario.end);
+		
+		int iQuantidadeDados = aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
+		
+		aSubArquivoBinario.seekg(0, aSubArquivoBinario.beg);
+		aSubArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
+		VetorPrimeiroRegistro[i].dado = RegistroComparacao;
+		VetorPrimeiroRegistro[i].sNomeArquivo = sNomeArquivo;			
+		VetorPrimeiroRegistro[i].iQuantidadeRegistros = iQuantidadeDados;			
+		aSubArquivoBinario.close();
+	}
+	
+	// Fazer um mergeSort dos SubArquivos
+	mergeSortSubArquivos(VetorPrimeiroRegistro, 0, iQuantidadeSubArquivos-1);
+	
+	int iPosicao = 0;
+	bool bFazerMergeSort = false;
+	bool bRemoverUltimoArquivo = false;
+	while (iQuantidadeRegistrosInseridos <= iTamanhoMaximo and ((iQuantidadeSubArquivos-1) > 0))
+	{
+		// Caso estiver marcado para Fazer merge, 			
+		if (bFazerMergeSort)
 		{
-			PayrollSaoFrancisco RegistroComparacao;
-			ifstream aSubArquivoBinario;
-			string sNomeArquivo = ("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin");
-			aSubArquivoBinario.open(sNomeArquivo, ios ::out | ios::binary);
-			aSubArquivoBinario.seekg(0, aSubArquivoBinario.end);
-			if ((aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco)) >= sizeof(PayrollSaoFrancisco) and (("subarquivos/" + _sNomeSubArquivos + to_string(i) + ".bin") != sNomeArquivoMenorRegistro))
-			{
-				aSubArquivoBinario.seekg(0, aSubArquivoBinario.beg);
-				aSubArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
-			
-				if (RegistroComparacao.cJobTitle[0] != '\0')
-				{
-					if (!bSetouPrimeiro)
-					{
-						rgMenorRegistro = RegistroComparacao;
-						sNomeArquivoMenorRegistro = sNomeArquivo;
-						bSetouPrimeiro = true;
-					} else
-					{
-						if (fncComparaRegistro((RegistroComparacao), (rgMenorRegistro)) == 1)
-						{
-							sNomeArquivoMenorRegistro = sNomeArquivo;
-							rgMenorRegistro = RegistroComparacao;
-						}
-					}
-				}
-			} else
-			{
-				if (!((aSubArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco)) >= sizeof(PayrollSaoFrancisco)))
-				{
-					iQuantidadeArquivosSemRegistros++;
-				}
-			}
-			
-			aSubArquivoBinario.close();
+			mergeSortSubArquivos(VetorPrimeiroRegistro, 0, iQuantidadeSubArquivos-1);
 		}
-						
-		if (sNomeArquivoMenorRegistro != "")
+			
+		// Essa flag é indicada para remover o ultimo vetor para 
+		if (bRemoverUltimoArquivo)
+		{
+			iQuantidadeSubArquivos--;
+			bRemoverUltimoArquivo = false;
+		}
+			
+		// Como o vetor de SubArquivo está ordenado pelo menor registro, eu pego o registro da posição "iPosicao" que indica o próximo menor registro
+		PayrollSaoFrancisco rgMenorRegistro = (VetorPrimeiroRegistro)[iPosicao].dado;
+		sNomeArquivoMenorRegistro = VetorPrimeiroRegistro[iPosicao].sNomeArquivo;
+		VetorPrimeiroRegistro[iPosicao].iQuantidadeRegistros--;
+		// Como eu encontrei o menor registro, fazemos a remoção do primeiro registro desse arquivo(O menor inserido no arquivo principal);
+		pcdRetirarPrimeiraPosicao(sNomeArquivoMenorRegistro);
+		
+		// Nesse momento lemos o segundo menor registro do arquivo que contém o menor registro para "passar" ele para frente.
+		PayrollSaoFrancisco RegistroComparacao;
+		ifstream aSubArquivoBinario;
+		aSubArquivoBinario.open(sNomeArquivoMenorRegistro, ios ::out | ios::binary);
+		aSubArquivoBinario.seekg(0, aSubArquivoBinario.beg);
+		aSubArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));		
+		VetorPrimeiroRegistro[iPosicao].dado = RegistroComparacao;
+		
+		// Caso na posição atual, a quantidade de registros for menor ou igual a zero, preencher o produto com informações
+		// altas, para que no MergeSort, ele seja jogado por último, e posteirormente será excluido da última posição.
+		if (VetorPrimeiroRegistro[iPosicao].iQuantidadeRegistros <= 0)
+		{
+			VetorPrimeiroRegistro[iPosicao].dado.iID = 999999;
+			for (int i = 0; i < 20; i++)
+			{
+				VetorPrimeiroRegistro[iPosicao].dado.cJobTitle[i] = 'Z'; 
+			}
+		}
+		aSubArquivoBinario.close();
+				
+		// Verificar se a posição que eu estou lendo do Vetor de SubArquivos, 
+		if (iPosicao < (iQuantidadeSubArquivos-1))
+		{
+			// Essa comparação foi feita para evitar ordenação desnecessária,
+			// Se o próximo registro ainda for menor que o anterior substituido no arquivo que contém o menor registro,
+			// então não vai ser necessário fazer MergeSort.
+			// As outras cláusulas são para evitar quebra da quantidade de registros do vetor.
+			if (fncComparaRegistro(RegistroComparacao, VetorPrimeiroRegistro[iPosicao+1].dado) == 1)
+			{
+				bFazerMergeSort = true;
+				iPosicao = 0;
+			}
+			else
+			{
+				if (iPosicao == (iQuantidadeSubArquivos-1))
+				{
+					bFazerMergeSort = true;
+					iPosicao = 0;
+				} else
+				{
+					bFazerMergeSort = false;
+					iPosicao++;
+				}
+				//cout << (iQuantidadeSubArquivos-1) << " - " << RegistroComparacao.cJobTitle << " - " << iPosicao << " - " << VetorPrimeiroRegistro[iPosicao+1].dado.cJobTitle << endl;
+			}
+		} else
+		{
+			bFazerMergeSort = true;
+			iPosicao = 0;
+		}
+					
+		// Caso o registro encontrado não esteja marcado para "excluir", inserimos ele no arquivo principal.
+		if ((rgMenorRegistro.iID != 999999))
 		{
 			fstream aArquivoBinario;
 			aArquivoBinario.open((_sNomeArquivoPrincipal), ios::in | ios ::out | ios::binary);
 			aArquivoBinario.seekp(0, aArquivoBinario.end);
-			
+				
 			aArquivoBinario.write((const char *)(&rgMenorRegistro), sizeof(PayrollSaoFrancisco));
 			aArquivoBinario.close();
-			
-			pcdRetirarPrimeiraPosicao(sNomeArquivoMenorRegistro);
-			
-			sNomeArquivoMenorRegistro = "";
-			
+							
 			iQuantidadeRegistrosInseridos++;
-			
-			if ((iQuantidadeRegistrosInseridos % 1000) == 0)
-				cout << "QTD INSERIDOS: " << iQuantidadeRegistrosInseridos << endl;
-			
-			bSetouPrimeiro = false;
-		}
-	}
-	aArquivoBinario.close();
-	cout << "QTD INSERIDOS: " << iQuantidadeRegistrosInseridos << endl;
-}
-
-void pcdOrdenar(string _sNomeArquivo)
-{
-	// Primeiro passo é copiar
-	
-	fstream aArquivoBinario;
-	aArquivoBinario.open(_sNomeArquivo, ios::in | ios ::out | ios::binary);
-	
-	if (aArquivoBinario)
-	{		
-		int iTamanhoMaximo = 0;
-		int iPosAtual = 0;
-		aArquivoBinario.seekg(0, aArquivoBinario.end);
-		iTamanhoMaximo = aArquivoBinario.tellg() / sizeof(PayrollSaoFrancisco);
-		aArquivoBinario.seekg((iPosAtual) * sizeof(PayrollSaoFrancisco), aArquivoBinario.beg);
-		PayrollSaoFrancisco *vet = new PayrollSaoFrancisco[1];
-		int iContRegistros = 0;
-		while (iPosAtual < iTamanhoMaximo)
-		{
-			PayrollSaoFrancisco RegistroComparacao;
-			aArquivoBinario.read(reinterpret_cast<char*>(&RegistroComparacao), sizeof(PayrollSaoFrancisco));
 						
-			vet[iContRegistros] = RegistroComparacao;       
-			iContRegistros++;
-			
-			if ((iContRegistros > 3000) or ((iPosAtual) >= iTamanhoMaximo))
-			{
-				mergeSort(vet, 0, iContRegistros-1);
-				for (int i = 0; i < (iContRegistros); i++)
-				{
-					/*cout << ((iPosAtual+1)-(iContRegistros))+i << " - RAIZ: " << vet[i].cJobTitle << " : " << vet[i].fOvertimePay << endl;
-					cout << (iContRegistros) << " - " << i << " -- ";
-					cout << vet[i].iID << ", ";
-					cout << vet[i].cEmployeeName << ", ";
-					cout << vet[i].cJobTitle << ", ";
-					cout << vet[i].fBasePay << ", "; 
-					cout << vet[i].fOvertimePay << ", ";
-					cout << vet[i].fOtherPay << ", ";
-					cout << vet[i].fBenefits << ", ";
-					cout << vet[i].fTotalPay << ", ";
-					cout << vet[i].fTotalPay_Benefits << ", ";  
-					cout << vet[i].iYear << endl; */      
-					aArquivoBinario.seekp(((((iPosAtual+1)-(iContRegistros))+i) * sizeof(PayrollSaoFrancisco)));
-					aArquivoBinario.write((const char *)(&vet[i]), sizeof(PayrollSaoFrancisco));
-				}
-				iContRegistros = 0;
-				aArquivoBinario.seekg((iPosAtual+1) * sizeof(PayrollSaoFrancisco));
-			}
-			
-			iPosAtual++;
-			if (((iPosAtual) < iTamanhoMaximo))
-			{
-				vet = fncAlocarVetor(vet, iContRegistros+1);
-			}	
+			if ((iQuantidadeRegistrosInseridos % 1000) == 0)
+				cout << "Aguarde... ordenando arquivo!" << endl;
+		} else
+		{
+			// Caso o registro encontraso seja um dos que foi marcado como "excluido" após o MergeSort ele irá para a ultima posição
+			// Então devemos marcar para removê-lo.
+			bFazerMergeSort = true;
+			iPosicao = 0;
+			bRemoverUltimoArquivo = true;
 		}
-	} else
-	{
-		cout << "Erro na leitura do arquivo!";
 	}
-	
 	aArquivoBinario.close();
 }
-
-
 
 int main()
 {
@@ -821,7 +864,7 @@ int main()
 		cout << "5 - Trocar elementos de posicao" << endl; // OK
 		cout << "6 - Alterar dados de um registro de uma posicao" << endl; // OK
 		cout << "7 - Inserir registro no final" << endl; // OK
-		cout << "8 - Ordenar arquivo binario" << endl; 
+		cout << "8 - Ordenar arquivo binario" << endl; // OK
 		cout << "=============================================================" << endl;
 		
 		cin >> iOpcao;
@@ -884,10 +927,6 @@ int main()
 		{
 			cout << "Ordenando registros..." << endl;
 			pcdOrdenacaoArquivos(sNomeArquivoBinario, "subArquivo");
-		} else if (iOpcao == 9)
-		{
-			cout << "Dividindo arquivo..." << endl;
-			pcdDividirArquivoCompacto(sNomeArquivoBinario, "subArquivo");
 		} else if (iOpcao == 0)
 		{
 			cout << "Saindo..." << endl;
