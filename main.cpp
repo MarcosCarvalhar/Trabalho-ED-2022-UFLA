@@ -689,7 +689,7 @@ void pcdRetirarPrimeiraPosicao(string _sNomeArquivo)
 	aSubArquivoBinario2.close();
 }
 
-void pcdOrdenacaoArquivos2(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
+void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivos)
 {
 	// Abrir o arquivo para pegar tamanho máximo
 	fstream aArquivoBinario;
