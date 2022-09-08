@@ -54,23 +54,20 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 			{
 				// Ler o cabeçalho
 				getline(aArquivoEntrada, sNomeCampos);
-				bLeuNomeCampo = true;
-				//cout << sNomeCampos << endl;
+				bLeuNomeCampo = true;				
 			}
             getline(aArquivoEntrada, sValorCampo, ',');
             // Se o ID da primeira posição não estiver vazio, então o arquivo tem informações.
             if (sValorCampo != "")
             {   
-				// Ler e converter as informações da linha para o registro
-				//cout << sValorCampo << ","; 
+				// Ler e converter as informações da linha para o registro			
 				
 				TRegistro.iID = std::stoi(sValorCampo);
 				
 				getline(aArquivoEntrada, sValorCampo, ','); 
 				
 				if (sValorCampo[0] == '"')
-				{
-					//cout << sValorCampo << ","; 
+				{					
 					iTamanho = sValorCampo.size();
 					for (int i = 0; i < iTamanho; i++)
 					{
@@ -90,8 +87,7 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 					
 					(TRegistro.cEmployeeName)[(iTamanho + iOutroTamanho)] = '\0';
 				} else
-				{
-					//cout << sValorCampo << ",";
+				{					
 					iTamanho = sValorCampo.size();
 					for (int i = 0; i < iTamanho; i++)
 					{
@@ -104,8 +100,7 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 				getline(aArquivoEntrada, sValorCampo, ','); 
 				
 				if (sValorCampo[0] == '"')
-				{
-					//cout << sValorCampo << ","; 
+				{					
 					iTamanho = sValorCampo.size();
 					for (int i = 0; i < iTamanho; i++)
 					{
@@ -125,8 +120,7 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 					
 					(TRegistro.cJobTitle)[(iTamanho + iOutroTamanho)] = '\0';
 				} else
-				{
-					//cout << sValorCampo << ","; 
+				{					
 					iTamanho = sValorCampo.size();
 					for (int i = 0; i < iTamanho; i++)
 					{
@@ -136,37 +130,29 @@ void fncConverterCSVParaBinario(string _sNomeArquivoEntrada, string _sNomeArquiv
 					(TRegistro.cJobTitle)[iTamanho] = '\0';
 				}
 				
-				getline(aArquivoEntrada, sValorCampo, ',');  
-				//cout << sValorCampo << ",";
+				getline(aArquivoEntrada, sValorCampo, ',');  				
 				TRegistro.fBasePay = std::atof(sValorCampo.c_str());
 				
-				getline(aArquivoEntrada, sValorCampo, ',');  
-				//cout << sValorCampo << ",";
+				getline(aArquivoEntrada, sValorCampo, ',');  				
 				TRegistro.fOvertimePay = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo, ',');
 				if (sValorCampo == "Not Provided")
 					sValorCampo = '0';
-				//cout << sValorCampo << ",";  
 				TRegistro.fOtherPay = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo, ',');
-				//cout << sValorCampo << ",";    
 				TRegistro.fBenefits = std::atof(sValorCampo.c_str());
 				
 				getline(aArquivoEntrada, sValorCampo, ',');
-				//cout << sValorCampo << ",";    
 				TRegistro.fTotalPay = std::atof(sValorCampo.c_str());
 				
-				getline(aArquivoEntrada, sValorCampo, ',');
-				//cout << sValorCampo << ",";  
+				getline(aArquivoEntrada, sValorCampo, ',');				
 				TRegistro.fTotalPay_Benefits = std::atof(sValorCampo.c_str());
 				
-				getline(aArquivoEntrada, sValorCampo); 
-				//cout << sValorCampo; 
+				getline(aArquivoEntrada, sValorCampo); 				
 				TRegistro.iYear = std::stoi(sValorCampo);
-
-				//cout << endl;
+				
 				// Escrever registro no arquivo
 				aArquivoSaida.write((const char *)(&TRegistro), sizeof(PayrollSaoFrancisco)); 
 			}
@@ -203,16 +189,6 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 			for (int i = 0; i < iQtdRegistros; i++) 
 			{      
 				aArquivoBinario.read(reinterpret_cast<char*>(&tmpRegistro), sizeof(PayrollSaoFrancisco));
-				/*cout << "ID: " << tmpRegistro.iID << ", ";
-				cout << "Nome do Funcionario: " << tmpRegistro.cEmployeeName << ", ";
-				cout << "Cargo: " << tmpRegistro.cJobTitle << ", ";
-				cout << "Pagamento Base: " << tmpRegistro.fBasePay << ", "; 
-				cout << "Pagamento extra: " << tmpRegistro.fOvertimePay << ", ";
-				cout << "Outros pagamentos: " << tmpRegistro.fOtherPay << ", ";
-				cout << "Beneficios: " << tmpRegistro.fBenefits << ", ";
-				cout << "Pagamento Total: " << tmpRegistro.fTotalPay << ", ";
-				cout << "Pagamento Total com Beneficios: " << tmpRegistro.fTotalPay_Benefits << ", ";  
-				cout << "Ano: " << tmpRegistro.iYear << endl;*/
 				// Deixada a impressão de forma que facilite a comparação de valores
 				cout << tmpRegistro.iID << ", ";
 				cout << tmpRegistro.cEmployeeName << ", ";
@@ -250,16 +226,6 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 			for (int i = 0; i < iQuantidadeRegistros; i++) 
 			{        
 				aArquivoBinario.read(reinterpret_cast<char*>(&tmpRegistro), sizeof(PayrollSaoFrancisco));
-				/*cout << "ID: " << tmpRegistro.iID << ", ";
-				cout << "Nome do Funcionario: " << tmpRegistro.cEmployeeName << ", ";
-				cout << "Cargo: " << tmpRegistro.cJobTitle << ", ";
-				cout << "Pagamento Base: " << tmpRegistro.fBasePay << ", "; 
-				cout << "Pagamento extra: " << tmpRegistro.fOvertimePay << ", ";
-				cout << "Outros pagamentos: " << tmpRegistro.fOtherPay << ", ";
-				cout << "Beneficios: " << tmpRegistro.fBenefits << ", ";
-				cout << "Pagamento Total: " << tmpRegistro.fTotalPay << ", ";
-				cout << "Pagamento Total com Beneficios: " << tmpRegistro.fTotalPay_Benefits << ", ";  
-				cout << "Ano: " << tmpRegistro.iYear << endl;*/
 				// Deixada a impressão de forma que facilite a comparação de valores
 				cout << tmpRegistro.iID << ", ";
 				cout << tmpRegistro.cEmployeeName << ", ";
@@ -286,40 +252,33 @@ void fncImprimirArquivoBinario(string _sNomeArquivoBinario, int _iPosicaoInicial
 int fncComparaRegistro(PayrollSaoFrancisco _TMPREGISTRO1, PayrollSaoFrancisco _TMPREGISTRO2)
 {
 	// Primeiro compara cJobTitle.
-	//cout << _TMPREGISTRO1.cJobTitle << " - " << _TMPREGISTRO2.cJobTitle << endl;
 	if (_TMPREGISTRO1.cJobTitle != _TMPREGISTRO2.cJobTitle)
 	{
 		int iComparacao = strcmp(_TMPREGISTRO1.cJobTitle, _TMPREGISTRO2.cJobTitle);
 		if (iComparacao < 0)
 		{
-			//cout << _TMPREGISTRO1.cJobTitle << endl;
 			return 1;
 		} else if (iComparacao > 0)
 		{
-			//cout << _TMPREGISTRO2.cJobTitle << endl;
 			return 2;
 		} else
 		{
 			// Caso não for nem maior, nem menor, ou seja, é igual, então compara-se o ID.
 			if (_TMPREGISTRO1.iID < _TMPREGISTRO2.iID)
 			{
-				//cout << _TMPREGISTRO1.cJobTitle << endl;
 				return 1;
 			} else
-			{
-				//cout << _TMPREGISTRO2.cJobTitle << endl;
+			{			
 				return 2;
 			}
 		}
 	} else
 	{
 		if (_TMPREGISTRO1.iID < _TMPREGISTRO2.iID)
-		{
-			//cout << _TMPREGISTRO1.cJobTitle << endl;
+		{			
 			return 1;
 		} else
-		{
-			//cout << _TMPREGISTRO2.cJobTitle << endl;
+		{			
 			return 2;
 		}
 	}
@@ -563,9 +522,7 @@ void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivo
 	// Criar o arquivo principal para inserção dos registros.
 	ofstream aCreateArquivoBinario;
 	aCreateArquivoBinario.open((_sNomeArquivoPrincipal), ios::binary);
-	aCreateArquivoBinario.close();
-	
-	//cout << "QTD ESPERADA DE DADOS: " << iTamanhoMaximo << endl;
+	aCreateArquivoBinario.close();		
 		
 	// Criado novo vetor da nova Struct que contem o Primeiro registro de cada arquivo, a quantidade de registros e o nome desse arquivo.
 	SubArquivos *VetorPrimeiroRegistro = new SubArquivos[iQuantidadeSubArquivos];
@@ -659,8 +616,7 @@ void pcdOrdenacaoArquivos(string _sNomeArquivoPrincipal, string _sNomeSubArquivo
 				{
 					bFazerMergeSort = false;
 					iPosicao++;
-				}
-				//cout << (iQuantidadeSubArquivos-1) << " - " << RegistroComparacao.cJobTitle << " - " << iPosicao << " - " << VetorPrimeiroRegistro[iPosicao+1].dado.cJobTitle << endl;
+				}				
 			}
 		} else
 		{
@@ -720,12 +676,8 @@ int main()
 			fncConverterCSVParaBinario(sNomeArquivo, sNomeArquivoBinario);
 		} else if (iOpcao == 2)
 		{
-			cout << "Imprimindo registros..." << endl;
-			string sNomeArquivo;
-			cin >> sNomeArquivo;
-			if (sNomeArquivo == "*")
-				sNomeArquivo = sNomeArquivoBinario;
-			fncImprimirArquivoBinario(sNomeArquivo, -1, -1);
+			cout << "Imprimindo registros..." << endl;		
+			fncImprimirArquivoBinario(sNomeArquivoBinario, -1, -1);
 		} else if (iOpcao == 3)
 		{
 			cout << "Ordenando registros..." << endl;
